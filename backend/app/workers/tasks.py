@@ -1,4 +1,3 @@
-from celery import shared_task
 from app.workers.celery_app import celery_app
 from app.db.session import SessionLocal
 from app import models
@@ -6,7 +5,7 @@ from app.services.orchestration import run_scan
 from app.services.monitoring import rescan_active_targets
 
 
-@shared_task(name="app.workers.tasks.run_scan_task")
+@celery_app.task(name="app.workers.tasks.run_scan_task")
 def run_scan_task(target_id: int, initiated_by: int | None, trigger_type: str, log_file: str | None):
     db = SessionLocal()
     try:
@@ -19,7 +18,7 @@ def run_scan_task(target_id: int, initiated_by: int | None, trigger_type: str, l
         db.close()
 
 
-@shared_task(name="app.workers.tasks.scheduled_rescan")
+@celery_app.task(name="app.workers.tasks.scheduled_rescan")
 def scheduled_rescan():
     db = SessionLocal()
     try:

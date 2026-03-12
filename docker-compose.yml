@@ -53,7 +53,7 @@ services:
   frontend:
     build: ./frontend
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - VITE_API_URL=http://backend:8000
     ports:
       - "5173:5173"
     depends_on:
@@ -63,7 +63,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    command: uvicorn backend.api_server:app --host 0.0.0.0 --port 8100 --reload
+    command: uvicorn backend_api_server:app --host 0.0.0.0 --port 8100 --reload
     ports:
       - "8100:8100"
 
