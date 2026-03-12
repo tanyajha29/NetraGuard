@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: netraguard
+      POSTGRES_PASSWORD: netraguard
+      POSTGRES_DB: netraguard
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_URL_OVERRIDE: ${DATABASE_URL_OVERRIDE:-}
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8000:8000"
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file: .env
+    command: celery -A app.workers.celery_app worker --loglevel=info
+    depends_on:
+      - backend
+      - redis
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file: .env
+    command: celery -A app.workers.celery_app beat --loglevel=info
+    depends_on:
+      - backend
+      - redis
+
+  frontend:
+    build: ./frontend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  mock_target:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: uvicorn backend.api_server:app --host 0.0.0.0 --port 8100 --reload
+    ports:
+      - "8100:8100"
+
+volumes:
+  pgdata:
