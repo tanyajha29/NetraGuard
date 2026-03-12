@@ -1,0 +1,13 @@
+{
+  "/api/v1/users": 210,
+  "/api/v1/payments": 180,
+  "/api/v1/transactions": 155,
+  "/api/v1/accounts": 90,
+  "/api/v1/old-login": 0,
+  "/api/v1/legacy-transfer": 2,
+  "/api/v1/test-api": 0,
+  "/api/v1/dev-mock": 0,
+  "/internal/debug": 0,
+  "/internal/health-raw": 0,
+  "/api/v2/new-payments": 320
+}
