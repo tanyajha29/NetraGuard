@@ -1,91 +1,56 @@
-# 🔐NetraGuard (Zombie API Discovery and Defence Platform)
+# 🔐 NetraGuard Platform (Refactored)
 
-> A professional cybersecurity prototype for discovering, detecting, and monitoring **Zombie APIs** — inactive, shadow, and deprecated endpoints that pose security risks in production environments.
+End-to-end API discovery, classification, and zombie/shadow detection platform with FastAPI + PostgreSQL backend, Celery workers, Redis, React/Vite frontend, and a mock banking target.
 
 ---
 
-## 🚀 Quick Start
-
-### 1. Install dependencies
+## Quick start (Docker)
 ```bash
-cd zombie-api-platform
+cp .env.example .env
+docker compose up --build
+```
+- Backend: http://localhost:8000/docs  
+- Frontend: http://localhost:5173 (set `VITE_API_URL` in `frontend/.env` if running separately)  
+- Mock target: http://localhost:8100/docs
+
+## Backend (manual)
+```bash
+python -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt
+alembic upgrade head           # run migrations
+uvicorn app.main:app --reload  # run from repo root with PYTHONPATH=backend/app
+celery -A app.workers.celery_app worker --loglevel=info
+celery -A app.workers.celery_app beat --loglevel=info
 ```
 
-### 2. Start the mock API server (Terminal 1)
+## Frontend (manual)
 ```bash
-uvicorn backend.api_server:app --host 0.0.0.0 --port 8000 --reload
+cd frontend
+npm install
+npm run dev -- --host --port 5173
 ```
-API docs available at: http://localhost:8000/docs
 
-### 3. Launch the dashboard (Terminal 2)
+## Migrations
+- Config: `backend/alembic.ini`
+- Initial revision: `backend/alembic/versions/0001_initial.py`
+- Commands: `alembic revision --autogenerate -m "msg"` then `alembic upgrade head`
+
+## Tests
 ```bash
-streamlit run dashboard/dashboard.py
-```
-Dashboard available at: http://localhost:8501
-
----
-
-## 🧟 Demo Scenarios
-
-| Log File | Scenario |
-|----------|----------|
-| `logs_test1.json` | Normal traffic — healthy system baseline |
-| `logs_test2.json` | APIs going inactive — zombie/deprecated APIs appear |
-| `logs_test3.json` | New API detected — `/api/v2/new-payments` discovered |
-
-### Expected Demo Flow
-1. Launch dashboard → empty state shown
-2. Select `logs_test1.json` → Click **START SCAN**
-3. System discovers 10 APIs, classifies zombie + shadow APIs
-4. Switch to `logs_test3.json` → Click **START SCAN**
-5. New API `/api/v2/new-payments` detected and alerted
-
----
-
-## 🏗 Architecture
-
-```
-zombie-api-platform/
-├── backend/
-│   ├── api_server.py      # Mock banking API (FastAPI)
-│   └── models.py          # SQLAlchemy ORM models
-├── scanner/
-│   ├── api_discovery.py   # OpenAPI spec fetcher
-│   ├── log_analyzer.py    # Traffic log parser
-│   ├── zombie_detector.py # Classification + risk scoring
-│   └── scan_engine.py     # Orchestrates full scan
-├── database/
-│   └── db.py              # SQLite session management
-├── dashboard/
-│   └── dashboard.py       # Streamlit interactive UI
-├── data/
-│   ├── logs_test1.json    # Normal traffic scenario
-│   ├── logs_test2.json    # Inactive APIs scenario
-│   └── logs_test3.json    # New API detection scenario
-└── requirements.txt
+pytest backend/tests
 ```
 
----
+## Demo flow
+1) Ensure mock target running (`mock_target` service).  
+2) Register/login via `/api/v1/auth/*` and capture JWT.  
+3) POST `/api/v1/targets` with `base_url` `http://mock_target:8100` (or `http://localhost:8100` locally).  
+4) POST `/api/v1/scans/start` with `log_file` `logs_test1.json`.  
+5) View inventory/findings/alerts/reports in frontend dashboard.  
+6) Zombie APIs auto-create workflows; demo auto-disable causes 410 Gone responses on disabled mock routes.  
 
-## 🔍 API Classification Rules
-
-| Status | Criteria | Risk |
-|--------|----------|------|
-| **Active** | traffic > 20 | Low |
-| **Deprecated** | 0 < traffic < 20 | Medium |
-| **Zombie** | traffic = 0, name contains old/test/dev/mock | High/Critical |
-| **Shadow** | path contains internal/debug | Medium/High |
-
-## 📊 Risk Scoring
-
-```
-risk_score = inactivity_score + exposure_score + lifecycle_score
-```
-
-- **Inactivity**: 40pts (zero traffic), 20pts (low traffic), 0pts (active)
-- **Exposure**: 30pts (internal/debug), 10pts (public)
-- **Lifecycle**: 30pts (zombie), 20pts (deprecated), 5pts (active)
-
-Score ranges: Low (0–29) · Medium (30–49) · High (50–69) · Critical (70+)
-# NetraGuard
+## Structure
+- `backend/app` — FastAPI app, models, services, Celery tasks
+- `backend/alembic` — migrations
+- `frontend/` — React + TypeScript + Vite UI (protected routes, tables, charts)
+- `data/` — sample traffic logs
+- `backend/api_server.py` — mock banking API with demo auto-disable
