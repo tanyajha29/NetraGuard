@@ -88,3 +88,4 @@ risk_score = inactivity_score + exposure_score + lifecycle_score
 - **Lifecycle**: 30pts (zombie), 20pts (deprecated), 5pts (active)
 
 Score ranges: Low (0–29) · Medium (30–49) · High (50–69) · Critical (70+)
+# NetraGuard
