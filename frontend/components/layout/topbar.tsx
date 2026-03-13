@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, Bell, ChevronDown, Radar, User } from "lucide-react"
+import { Search, Bell, ChevronDown, Radar, User, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -9,8 +9,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "../auth/auth-provider"
+import { apiFetch } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 const environments = ["Production", "Staging", "Development"]
 
@@ -18,11 +19,25 @@ export function Topbar() {
   const [environment, setEnvironment] = useState("Production")
   const [isScanning, setIsScanning] = useState(false)
   const { user, logout } = useAuth()
-  const router = useRouter()
+  const { toast } = useToast()
 
-  const handleScan = () => {
+  const handleScan = async () => {
     setIsScanning(true)
-    setTimeout(() => setIsScanning(false), 3000)
+    try {
+      const targets = await apiFetch<any[]>("/api/v1/targets")
+      if (!targets.length) {
+        throw new Error("Add a target first.")
+      }
+      await apiFetch("/api/v1/scans/start", {
+        method: "POST",
+        body: { target_id: targets[0].id, trigger_type: "manual", log_file: "logs_test1.json" },
+      })
+      toast({ title: "Scan started", description: `Dispatching scan for ${targets[0].name}` })
+    } catch (err: any) {
+      toast({ title: "Scan failed", description: err.message || "Could not start scan", variant: "destructive" })
+    } finally {
+      setIsScanning(false)
+    }
   }
 
   return (
@@ -104,7 +119,10 @@ export function Topbar() {
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                   <User className="w-4 h-4 text-primary" />
                 </div>
-                <span className="text-sm text-foreground">{user?.full_name ?? "Analyst"}</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-sm text-foreground leading-tight">{user?.full_name || "User"}</span>
+                  <span className="text-[11px] text-muted-foreground">{user?.email}</span>
+                </div>
                 <ChevronDown className="w-4 h-4 text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
@@ -118,14 +136,8 @@ export function Topbar() {
               <DropdownMenuItem className="cursor-pointer">
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer text-destructive"
-                onClick={() => {
-                  logout()
-                  router.replace("/auth/login")
-                }}
-              >
-                Sign Out
+              <DropdownMenuItem className="cursor-pointer text-destructive" onClick={logout}>
+                <LogOut className="w-4 h-4 mr-2" /> Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

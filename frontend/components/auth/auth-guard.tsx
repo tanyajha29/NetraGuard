@@ -1,22 +1,24 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "./auth-provider";
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { token, loading } = useAuth()
-  const router = useRouter()
-  const path = usePathname()
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !token && !path.startsWith("/auth")) {
-      router.replace("/auth/login")
+    if (!loading && !user) {
+      const next = encodeURIComponent(pathname || "/");
+      router.replace(`/login?next=${next}`);
     }
-  }, [token, loading, path, router])
+  }, [loading, user, router, pathname]);
 
-  if (!token && !path.startsWith("/auth")) {
-    return null
+  if (loading || (!user && typeof window !== "undefined")) {
+    return <div className="flex items-center justify-center h-screen text-muted-foreground">Checking session...</div>;
   }
-  return <>{children}</>
+
+  return <>{children}</>;
 }

@@ -7,39 +7,57 @@ import { ApiDetailPanel } from "@/components/inventory/api-detail-panel"
 import { Search, Filter, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { apiFetch } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
+
+type BackendAsset = {
+  id: number
+  path: string
+  method: string
+  traffic_count: number
+  current_status: string
+  risk_level: string
+  last_seen_at?: string
+  source_type?: string
+}
 
 export default function InventoryPage() {
   const [selectedApi, setSelectedApi] = useState<ApiEndpoint | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [apiData, setApiData] = useState<ApiEndpoint[]>([])
+  const [data, setData] = useState<ApiEndpoint[]>([])
+  const { toast } = useToast()
 
   useEffect(() => {
-    apiFetch<ApiEndpoint[]>("/api/v1/inventory")
-      .then((data) =>
-        setApiData(
-          data.map((item) => ({
-            id: String(item.id),
-            endpoint: item.path,
-            method: item.method,
-            traffic: item.traffic_count,
-            status: item.current_status as any,
-            risk: item.risk_level.toLowerCase() as any,
-            lastUsed: item.last_seen_at ?? "Unknown",
-            source: item.source_type ?? "scan",
+    apiFetch<BackendAsset[]>("/api/v1/inventory")
+      .then((items) =>
+        setData(
+          items.map((a) => ({
+            id: String(a.id),
+            endpoint: a.path,
+            method: a.method,
+            traffic: a.traffic_count,
+            status: a.current_status as any,
+            risk: (a.risk_level || "low").toLowerCase() as any,
+            lastUsed: a.last_seen_at || "unknown",
+            source: a.source_type || "discovery",
           }))
         )
       )
-      .catch(() => setApiData([]))
-  }, [])
+      .catch((err: any) =>
+        toast({ title: "Failed to load inventory", description: err.message, variant: "destructive" })
+      )
+  }, [toast])
 
   const filteredData = useMemo(
-    () => apiData.filter((api) => api.endpoint.toLowerCase().includes(searchQuery.toLowerCase())),
-    [apiData, searchQuery]
+    () => data.filter((api) => api.endpoint.toLowerCase().includes(searchQuery.toLowerCase())),
+    [data, searchQuery]
   )
+
+  const stat = (status: string) => filteredData.filter((a) => a.status === status).length
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">API Inventory</h1>
@@ -59,31 +77,33 @@ export default function InventoryPage() {
           </div>
         </div>
 
+        {/* Stats */}
         <div className="grid grid-cols-4 gap-4">
           <div className="glass-card rounded-lg p-4 border border-border/50">
-            <p className="text-2xl font-bold font-mono text-foreground">{apiData.length}</p>
+            <p className="text-2xl font-bold font-mono text-foreground">{filteredData.length}</p>
             <p className="text-sm text-muted-foreground">Total Endpoints</p>
           </div>
           <div className="glass-card rounded-lg p-4 border border-success/30">
             <p className="text-2xl font-bold font-mono text-success">
-              {apiData.filter((a) => a.status === "active").length}
+              {stat("active")}
             </p>
             <p className="text-sm text-muted-foreground">Active</p>
           </div>
           <div className="glass-card rounded-lg p-4 border border-warning/30">
             <p className="text-2xl font-bold font-mono text-warning">
-              {apiData.filter((a) => a.status === "shadow").length}
+              {stat("shadow")}
             </p>
             <p className="text-sm text-muted-foreground">Shadow APIs</p>
           </div>
           <div className="glass-card rounded-lg p-4 border border-critical/30">
             <p className="text-2xl font-bold font-mono text-critical">
-              {apiData.filter((a) => a.status === "zombie").length}
+              {stat("zombie")}
             </p>
             <p className="text-sm text-muted-foreground">Zombie APIs</p>
           </div>
         </div>
 
+        {/* Search */}
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -95,11 +115,14 @@ export default function InventoryPage() {
           />
         </div>
 
+        {/* Table */}
         <ApiTable data={filteredData} onRowClick={setSelectedApi} />
       </div>
 
+      {/* Detail Panel */}
       <ApiDetailPanel api={selectedApi} onClose={() => setSelectedApi(null)} />
 
+      {/* Overlay */}
       {selectedApi && (
         <div
           className="fixed inset-0 bg-background/50 backdrop-blur-sm z-40"

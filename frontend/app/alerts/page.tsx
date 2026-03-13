@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,8 @@ import {
   Activity,
   ChevronRight,
 } from "lucide-react"
+import { apiFetch } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 interface Alert {
   id: string
@@ -29,89 +31,6 @@ interface Alert {
   timestamp: string
   status: "open" | "investigating" | "resolved"
 }
-
-const alerts: Alert[] = [
-  {
-    id: "1",
-    type: "zombie",
-    severity: "critical",
-    title: "Zombie API Detected",
-    description: "Legacy payment endpoint has been inactive for 90+ days but still accessible",
-    endpoint: "/api/v1/payments/legacy",
-    timestamp: "2 minutes ago",
-    status: "open",
-  },
-  {
-    id: "2",
-    type: "shadow",
-    severity: "critical",
-    title: "Shadow API Exposed",
-    description: "Undocumented endpoint discovered with no authentication",
-    endpoint: "/api/internal/debug",
-    timestamp: "15 minutes ago",
-    status: "investigating",
-  },
-  {
-    id: "3",
-    type: "security",
-    severity: "warning",
-    title: "Authentication Missing",
-    description: "Public endpoint detected without proper auth middleware",
-    endpoint: "/api/users/export",
-    timestamp: "1 hour ago",
-    status: "open",
-  },
-  {
-    id: "4",
-    type: "anomaly",
-    severity: "warning",
-    title: "High Traffic Anomaly",
-    description: "Unusual spike in requests detected - 340% above baseline",
-    endpoint: "/api/v2/users",
-    timestamp: "2 hours ago",
-    status: "investigating",
-  },
-  {
-    id: "5",
-    type: "discovery",
-    severity: "info",
-    title: "New API Discovered",
-    description: "Previously unknown endpoint found during latest scan",
-    endpoint: "/api/beta/features",
-    timestamp: "3 hours ago",
-    status: "open",
-  },
-  {
-    id: "6",
-    type: "security",
-    severity: "critical",
-    title: "Rate Limiting Bypass",
-    description: "Possible rate limit bypass detected on admin endpoint",
-    endpoint: "/api/admin/users",
-    timestamp: "4 hours ago",
-    status: "resolved",
-  },
-  {
-    id: "7",
-    type: "zombie",
-    severity: "warning",
-    title: "Deprecated Endpoint Active",
-    description: "v1 endpoint receiving traffic despite deprecation",
-    endpoint: "/api/v1/auth/login",
-    timestamp: "5 hours ago",
-    status: "open",
-  },
-  {
-    id: "8",
-    type: "anomaly",
-    severity: "info",
-    title: "Latency Increase",
-    description: "Average response time increased by 45ms",
-    endpoint: "/api/v2/search",
-    timestamp: "6 hours ago",
-    status: "resolved",
-  },
-]
 
 const typeIcons = {
   zombie: Skull,
@@ -148,6 +67,27 @@ const severityConfig = {
 export default function AlertsPage() {
   const [filter, setFilter] = useState<"all" | "critical" | "warning" | "info">("all")
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "investigating" | "resolved">("all")
+  const [alerts, setAlerts] = useState<Alert[]>([])
+  const { toast } = useToast()
+
+  useEffect(() => {
+    apiFetch<any[]>("/api/v1/alerts")
+      .then((data) =>
+        setAlerts(
+          data.map((a) => ({
+            id: String(a.id),
+            type: (a.alert_type || "security") as Alert["type"],
+            severity: a.severity === "high" ? "critical" : a.severity === "medium" ? "warning" : "info",
+            title: a.alert_type || "Alert",
+            description: a.message || "",
+            endpoint: a.api_asset_id ? `Asset #${a.api_asset_id}` : "n/a",
+            timestamp: new Date(a.created_at || Date.now()).toLocaleString(),
+            status: (a.status || "open") as Alert["status"],
+          }))
+        )
+      )
+      .catch((err: any) => toast({ title: "Failed to load alerts", description: err.message, variant: "destructive" }))
+  }, [toast])
 
   const filteredAlerts = alerts.filter((alert) => {
     if (filter !== "all" && alert.severity !== filter) return false

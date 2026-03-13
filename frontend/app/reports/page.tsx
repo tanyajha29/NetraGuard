@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -15,6 +16,8 @@ import {
   File,
   Mail,
 } from "lucide-react"
+import { apiFetch, API_URL } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 interface Report {
   id: string
@@ -25,60 +28,6 @@ interface Report {
   lastGenerated: string
   schedule?: string
 }
-
-const reports: Report[] = [
-  {
-    id: "1",
-    name: "Weekly Security Summary",
-    description: "Overview of security posture, alerts, and remediation progress",
-    type: "security",
-    format: "PDF",
-    lastGenerated: "Mar 10, 2026",
-    schedule: "Every Monday",
-  },
-  {
-    id: "2",
-    name: "API Inventory Report",
-    description: "Complete catalog of all discovered APIs with status and risk levels",
-    type: "inventory",
-    format: "CSV",
-    lastGenerated: "Mar 12, 2026",
-  },
-  {
-    id: "3",
-    name: "Zombie API Analysis",
-    description: "Detailed analysis of inactive and deprecated endpoints",
-    type: "security",
-    format: "PDF",
-    lastGenerated: "Mar 11, 2026",
-    schedule: "Monthly",
-  },
-  {
-    id: "4",
-    name: "Compliance Audit",
-    description: "Security compliance status against industry standards",
-    type: "compliance",
-    format: "PDF",
-    lastGenerated: "Mar 1, 2026",
-    schedule: "Monthly",
-  },
-  {
-    id: "5",
-    name: "Traffic Analytics",
-    description: "API traffic patterns, trends, and anomaly detection",
-    type: "analytics",
-    format: "JSON",
-    lastGenerated: "Mar 12, 2026",
-  },
-  {
-    id: "6",
-    name: "Risk Assessment Report",
-    description: "Comprehensive risk scoring and vulnerability assessment",
-    type: "security",
-    format: "PDF",
-    lastGenerated: "Mar 8, 2026",
-  },
-]
 
 const typeConfig = {
   security: { icon: Shield, color: "text-critical", bg: "bg-critical/10" },
@@ -94,6 +43,30 @@ const formatConfig = {
 }
 
 export default function ReportsPage() {
+  const [reports, setReports] = useState<Report[]>([])
+  const { toast } = useToast()
+
+  useEffect(() => {
+    apiFetch<any[]>("/api/v1/reports")
+      .then((list) =>
+        setReports(
+          list.map((r) => ({
+            id: String(r.id),
+            name: `Report #${r.id}`,
+            description: r.summary || "Automated scan report",
+            type: "security",
+            format: (r.format || "html").toUpperCase() as Report["format"],
+            lastGenerated: new Date(r.generated_at || r.created_at || Date.now()).toLocaleDateString(),
+            schedule: undefined,
+            target_id: r.target_id,
+          })) as any
+        )
+      )
+      .catch((err: any) =>
+        toast({ title: "Failed to load reports", description: err.message, variant: "destructive" })
+      )
+  }, [toast])
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -130,11 +103,11 @@ export default function ReportsPage() {
             <p className="text-sm text-muted-foreground">Scheduled</p>
           </div>
           <div className="glass-card rounded-xl p-4 border border-border/50">
-            <p className="text-2xl font-bold font-mono text-foreground">24</p>
+            <p className="text-2xl font-bold font-mono text-foreground">—</p>
             <p className="text-sm text-muted-foreground">Generated This Month</p>
           </div>
           <div className="glass-card rounded-xl p-4 border border-border/50">
-            <p className="text-2xl font-bold font-mono text-foreground">12</p>
+            <p className="text-2xl font-bold font-mono text-foreground">—</p>
             <p className="text-sm text-muted-foreground">Email Recipients</p>
           </div>
         </div>
@@ -184,14 +157,20 @@ export default function ReportsPage() {
                       </span>
                     )}
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  <a
+                    className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex"
+                    href={`${API_URL}/api/v1/reports/${report.id}/download`}
+                    target="_blank"
+                    rel="noreferrer"
                   >
-                    <Download className="w-4 h-4 mr-1" />
-                    Download
-                  </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Download className="w-4 h-4 mr-1" />
+                      Download
+                    </Button>
+                  </a>
                 </div>
               </div>
             )
