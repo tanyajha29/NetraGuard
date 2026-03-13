@@ -68,7 +68,7 @@ export default function ScansPage() {
     try {
       await apiFetch("/api/v1/scans/start", {
         method: "POST",
-        body: JSON.stringify({ target_id: selectedTarget, trigger_type: "manual", log_file: logFile }),
+        body: { target_id: selectedTarget, trigger_type: "manual", log_file: logFile },
       })
       const latest = await apiFetch<ScanRow[]>("/api/v1/scans")
       setScanHistory(latest)
@@ -83,7 +83,7 @@ export default function ScansPage() {
     if (!newTarget.name || !newTarget.base_url) return
     await apiFetch("/api/v1/targets", {
       method: "POST",
-      body: JSON.stringify({ ...newTarget, is_active: true }),
+      body: { ...newTarget, is_active: true },
     })
     const refreshed = await apiFetch<Target[]>("/api/v1/targets")
     setTargets(refreshed)
