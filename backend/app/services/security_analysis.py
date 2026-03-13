@@ -21,6 +21,8 @@ def analyze_api(endpoint: Dict, base_url: str) -> Dict:
     risky_path = any(k in lower_path for k in ["internal", "debug", "admin", "test"])
     https = base_url.startswith("https://")
     sensitive = any(k in lower_path for k in SENSITIVE_KEYS)
+    response_keys = [str(k).lower() for k in endpoint.get("response_keys", [])]
+    sensitive_response = any(key in response_keys for key in SENSITIVE_KEYS)
 
     has_auth = endpoint.get("requires_auth", False)
     rate_limit = endpoint.get("rate_limit_detected", False)
@@ -34,8 +36,8 @@ def analyze_api(endpoint: Dict, base_url: str) -> Dict:
         findings.append(("internal_debug_exposed", "medium", "Internal/debug path exposed", "Restrict to internal networks"))
     if not rate_limit:
         findings.append(("no_rate_limit_detected", "medium", "No rate limiting detected", "Add rate limits"))
-    if sensitive:
-        findings.append(("sensitive_data_exposed", "high", "Sensitive data indicator in path", "Mask or remove sensitive fields"))
+    if sensitive or sensitive_response:
+        findings.append(("sensitive_data_exposed", "high", "Sensitive data indicator present", "Mask or remove sensitive fields"))
 
     return {
         "findings": findings,
@@ -43,5 +45,5 @@ def analyze_api(endpoint: Dict, base_url: str) -> Dict:
         "encryption_enabled": https,
         "rate_limit_detected": rate_limit,
         "risky_path": risky_path,
-        "sensitive": sensitive,
+        "sensitive": sensitive or sensitive_response,
     }

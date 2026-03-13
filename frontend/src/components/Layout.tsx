@@ -26,7 +26,12 @@ export const Layout: React.FC<{ title?: string; actions?: React.ReactNode; child
         </div>
         <div>
           {links.map((link) => (
-            <NavLink key={link.to} to={link.to} className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.to === "/"}
+              className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+            >
               {link.label}
             </NavLink>
           ))}

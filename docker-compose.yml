@@ -24,11 +24,14 @@ services:
     env_file: .env
     environment:
       DATABASE_URL_OVERRIDE: ${DATABASE_URL_OVERRIDE:-}
+      REPORTS_DIR: /app/backend/reports
     depends_on:
       - postgres
       - redis
     ports:
       - "8000:8000"
+    volumes:
+      - reports:/app/backend/reports
 
   celery_worker:
     build:
@@ -39,6 +42,8 @@ services:
     depends_on:
       - backend
       - redis
+    volumes:
+      - reports:/app/backend/reports
 
   celery_beat:
     build:
@@ -49,6 +54,8 @@ services:
     depends_on:
       - backend
       - redis
+    volumes:
+      - reports:/app/backend/reports
 
   frontend:
     build: ./frontend
@@ -69,3 +76,4 @@ services:
 
 volumes:
   pgdata:
+  reports:
