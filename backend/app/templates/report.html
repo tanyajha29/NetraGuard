@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { font-family: Arial, sans-serif; color:#0f172a; margin:24px; }
+    h1,h2,h3 { color:#0b1120; }
+    table { width:100%; border-collapse: collapse; margin-top:12px; }
+    th, td { border:1px solid #e5e7eb; padding:8px; font-size:13px; }
+    th { background:#f8fafc; text-align:left; }
+    .pill { padding:4px 8px; border-radius:12px; font-size:11px; }
+  </style>
+</head>
+<body>
+  <h1>NetraGuard Scan Report</h1>
+  <p><strong>Scan ID:</strong> {{ scan.id }} | <strong>Target:</strong> {{ scan.target_id }} | <strong>Started:</strong> {{ scan.started_at }} | <strong>Ended:</strong> {{ scan.ended_at }}</p>
+  <h2>Executive Summary</h2>
+  <ul>
+    <li>Total APIs: {{ scan.total_apis }}</li>
+    <li>Active: {{ scan.active_count }} | Deprecated: {{ scan.deprecated_count }} | Shadow: {{ scan.shadow_count }} | Zombie: {{ scan.zombie_count }}</li>
+    <li>Findings: {{ findings|length }}</li>
+  </ul>
+  <h2>Inventory</h2>
+  <table>
+    <thead><tr><th>Method</th><th>Path</th><th>Status</th><th>Risk</th><th>Traffic</th></tr></thead>
+    <tbody>
+      {% for a in assets %}
+      <tr>
+        <td>{{ a.method }}</td><td>{{ a.path }}</td><td>{{ a.current_status }}</td><td>{{ a.risk_level }}</td><td>{{ a.traffic_count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <h2>Findings</h2>
+  <table>
+    <thead><tr><th>Severity</th><th>Title</th><th>Description</th><th>Recommendation</th></tr></thead>
+    <tbody>
+      {% for f in findings %}
+      <tr>
+        <td>{{ f.severity }}</td><td>{{ f.title }}</td><td>{{ f.description }}</td><td>{{ f.recommendation }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

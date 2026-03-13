@@ -9,6 +9,7 @@ from sqlalchemy import (
     Text,
     JSON,
     Enum,
+    Float,
 )
 from sqlalchemy.orm import relationship
 import enum
@@ -101,6 +102,8 @@ class ScanRun(Base):
     zombie_count = Column(Integer, default=0)
     summary_json = Column(JSON, default=dict)
     created_at = Column(DateTime, default=datetime.utcnow)
+    vulnerabilities_found = Column(Integer, default=0)
+    duration_seconds = Column(Integer, default=0)
 
     target = relationship("Target", back_populates="scans")
     initiator = relationship("User", back_populates="scans")
@@ -121,6 +124,8 @@ class APIAsset(Base):
     version = Column(String, nullable=True)
     source_type = Column(String, nullable=True)
     source_reference = Column(String, nullable=True)
+    service_name = Column(String, nullable=True)
+    source = Column(String, nullable=True)
     owner = Column(String, nullable=True)
     auth_required = Column(Boolean, default=False)
     encryption_enabled = Column(Boolean, default=False)
@@ -131,7 +136,9 @@ class APIAsset(Base):
     current_status = Column(String, default="unknown")
     risk_level = Column(String, default="unknown")
     risk_score = Column(Integer, default=0)
+    last_scanned_at = Column(DateTime, nullable=True)
     recommendation = Column(Text, nullable=True)
+    status_reason = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -143,6 +150,17 @@ class APIAsset(Base):
     findings = relationship("APIFinding", back_populates="api_asset")
     alerts = relationship("Alert", back_populates="api_asset")
     workflows = relationship("DecommissionWorkflow", back_populates="api_asset")
+    traffic_samples = relationship("TrafficSample", back_populates="api_asset")
+    dependencies_out = relationship(
+        "DependencyEdge",
+        foreign_keys="DependencyEdge.source_api_id",
+        back_populates="source_api",
+    )
+    dependencies_in = relationship(
+        "DependencyEdge",
+        foreign_keys="DependencyEdge.target_api_id",
+        back_populates="target_api",
+    )
 
 
 class APIStatusHistory(Base):
@@ -169,6 +187,10 @@ class APIFinding(Base):
     title = Column(String)
     description = Column(Text)
     recommendation = Column(Text)
+    cwe = Column(String, nullable=True)
+    owasp = Column(String, nullable=True)
+    evidence = Column(Text, nullable=True)
+    parameter = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     api_asset = relationship("APIAsset", back_populates="findings")
@@ -223,3 +245,44 @@ class DecommissionWorkflow(Base):
 
     api_asset = relationship("APIAsset", back_populates="workflows")
     scan_run = relationship("ScanRun")
+
+
+class RemediationTask(Base):
+    __tablename__ = "remediation_tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    api_asset_id = Column(Integer, ForeignKey("api_assets.id"))
+    status = Column(String, default="open")
+    assigned_to = Column(String, nullable=True)
+    due_date = Column(DateTime, nullable=True)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    api_asset = relationship("APIAsset")
+
+
+class DependencyEdge(Base):
+    __tablename__ = "dependency_edges"
+
+    id = Column(Integer, primary_key=True, index=True)
+    source_api_id = Column(Integer, ForeignKey("api_assets.id"))
+    target_api_id = Column(Integer, ForeignKey("api_assets.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    source_api = relationship("APIAsset", foreign_keys=[source_api_id], back_populates="dependencies_out")
+    target_api = relationship("APIAsset", foreign_keys=[target_api_id], back_populates="dependencies_in")
+
+
+class TrafficSample(Base):
+    __tablename__ = "traffic_samples"
+
+    id = Column(Integer, primary_key=True, index=True)
+    api_asset_id = Column(Integer, ForeignKey("api_assets.id"))
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    count = Column(Integer, default=0)
+    method = Column(String, default="GET")
+    path = Column(String)
+    source = Column(String, default="logs")
+
+    api_asset = relationship("APIAsset", back_populates="traffic_samples")

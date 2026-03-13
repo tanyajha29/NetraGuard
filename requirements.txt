@@ -18,3 +18,4 @@ streamlit==1.38.0
 pandas==2.2.3
 plotly==5.24.1
 networkx==3.3
+weasyprint==62.3

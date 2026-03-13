@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app import models
+from app.services.report_service import render_report
 from app.core.security import get_current_user
 from app.db.session import get_db
 from app.schemas import report as report_schema
@@ -43,3 +44,22 @@ def download_report(
     if not os.path.exists(report.file_path):
         raise HTTPException(status_code=404, detail="Report file missing")
     return FileResponse(report.file_path, media_type="text/html", filename=os.path.basename(report.file_path))
+
+
+@router.post("/generate/{scan_id}", response_model=report_schema.ReportOut)
+def generate_report(
+    scan_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    scan = db.query(models.ScanRun).filter(models.ScanRun.id == scan_id).first()
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found")
+    assets = db.query(models.APIAsset).filter(models.APIAsset.scan_run_id == scan.id).all()
+    findings = db.query(models.APIFinding).filter(models.APIFinding.scan_run_id == scan.id).all()
+    path = render_report(scan, assets, findings)
+    report = models.Report(scan_run_id=scan.id, target_id=scan.target_id, file_path=path, summary="Generated")
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+    return report

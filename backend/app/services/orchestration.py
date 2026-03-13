@@ -6,10 +6,12 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.config import get_settings
-from app.services.discovery import fetch_openapi_endpoints, load_log_traffic, crawl_endpoints
-from app.services.classification import classify_endpoint
-from app.services.security_analysis import analyze_api
-from app.services.reporting import render_report
+from app.services.discovery_service import discover_endpoints
+from app.services.classification_service import classify
+from app.services.security_service import analyze_endpoint
+from app.services.report_service import render_report
+from app.services.dependency_mapper import upsert_edges
+from app.services.traffic_analyzer import record_samples
 
 settings = get_settings()
 
@@ -49,13 +51,10 @@ def _auto_disable_if_demo(target: models.Target, asset: models.APIAsset):
 
 
 def _merge_discoveries(target: models.Target, log_file: Optional[str]) -> Tuple[List[Dict], Dict[str, int]]:
-    openapi_eps = fetch_openapi_endpoints(target.base_url)
-    crawler_eps = crawl_endpoints(target.base_url)
-    traffic = load_log_traffic(log_file)
-
+    endpoints, traffic = discover_endpoints(target.base_url, log_file)
     merged: Dict[Tuple[str, str], Dict] = {}
 
-    for ep in openapi_eps + crawler_eps:
+    for ep in endpoints:
         key = (ep["path"], ep["method"])
         merged[key] = {**ep, "documented": ep.get("source_type") == "openapi"}
 
@@ -136,7 +135,7 @@ def run_scan(
             prev_traffic = asset.traffic_count or 0
             has_owner = bool(asset.owner)
 
-        classification = classify_endpoint(
+        classification = classify(
             ep["path"],
             count,
             source_type=ep.get("source_type", "openapi"),
@@ -144,7 +143,7 @@ def run_scan(
             has_owner=has_owner,
             version=ep.get("version"),
         )
-        security = analyze_api(ep, target.base_url)
+        security = analyze_endpoint(ep, target.base_url)
 
         _record_status_change(db, asset, classification["status"], reason="status_changed_during_scan")
 
@@ -297,6 +296,10 @@ def run_scan(
 
         assets_for_report.append(asset)
         total += 1
+
+    # Persist traffic samples and basic dependency edges
+    record_samples(db, assets_for_report, traffic, models)
+    upsert_edges(db, assets_for_report, traffic)
 
     db.add_all(findings_created)
     db.add_all(alerts_created)

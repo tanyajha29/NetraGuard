@@ -22,3 +22,22 @@ def list_alerts(
         except ValueError:
             return []
     return query.order_by(models.Alert.created_at.desc()).all()
+
+
+@router.patch("/{alert_id}")
+def update_alert(
+    alert_id: int,
+    status: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    alert = db.query(models.Alert).filter(models.Alert.id == alert_id).first()
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    try:
+        alert.status = models.AlertStatus(status)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    db.commit()
+    db.refresh(alert)
+    return alert
