@@ -17,5 +17,8 @@ def list_alerts(
 ):
     query = db.query(models.Alert)
     if status:
-        query = query.filter(models.Alert.status == status)
+        try:
+            query = query.filter(models.Alert.status == models.AlertStatus(status))
+        except ValueError:
+            return []
     return query.order_by(models.Alert.created_at.desc()).all()
