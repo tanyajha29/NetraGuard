@@ -12,11 +12,18 @@ SENSITIVE_KEYS = [
 ]
 
 
-def analyze_api(path: str, base_url: str, has_auth: bool, rate_limit: bool) -> Dict:
+def analyze_api(endpoint: Dict, base_url: str) -> Dict:
+    """
+    Lightweight static security checks using endpoint metadata.
+    """
+    path = endpoint["path"]
     lower_path = path.lower()
     risky_path = any(k in lower_path for k in ["internal", "debug", "admin", "test"])
     https = base_url.startswith("https://")
     sensitive = any(k in lower_path for k in SENSITIVE_KEYS)
+
+    has_auth = endpoint.get("requires_auth", False)
+    rate_limit = endpoint.get("rate_limit_detected", False)
 
     findings = []
     if not has_auth:
@@ -28,7 +35,7 @@ def analyze_api(path: str, base_url: str, has_auth: bool, rate_limit: bool) -> D
     if not rate_limit:
         findings.append(("no_rate_limit_detected", "medium", "No rate limiting detected", "Add rate limits"))
     if sensitive:
-        findings.append(("sensitive_data_exposed", "high", "Sensitive data in path", "Mask or remove sensitive fields"))
+        findings.append(("sensitive_data_exposed", "high", "Sensitive data indicator in path", "Mask or remove sensitive fields"))
 
     return {
         "findings": findings,

@@ -1,5 +1,6 @@
 """
 Application configuration using environment variables.
+Keeps all tunable thresholds and external service URLs in one place.
 """
 from functools import lru_cache
 from pydantic_settings import BaseSettings
@@ -10,6 +11,7 @@ import secrets
 class Settings(BaseSettings):
     project_name: str = Field(default="NetraGuard API Security Platform")
     api_v1_str: str = "/api/v1"
+    app_env: str = Field(default="dev")
     secret_key: str = Field(default_factory=lambda: secrets.token_urlsafe(32))
     access_token_expire_minutes: int = 60 * 12
 
@@ -25,16 +27,29 @@ class Settings(BaseSettings):
     redis_url: str = "redis://redis:6379/0"
     celery_broker_url: str | None = None
     celery_result_backend: str | None = None
+    scheduler_interval_minutes: int = 30
 
     # Discovery / classification thresholds
     active_traffic_min: int = 20
     zombie_traffic_max: int = 0
     deprecated_traffic_max: int = 19
+    traffic_drop_pct: int = 50
     shadow_keywords: str = "internal,debug,health-raw"
     zombie_keywords: str = "old,test,dev,mock,legacy"
+    crawl_common_paths: str = (
+        "/health,/metrics,/internal/debug,/internal/health-raw,"
+        "/api/v1/users,/api/v1/payments,/api/v1/transactions,/api/v1/old-login,"
+        "/api/v1/test-api,/api/v1/dev-mock"
+    )
+    crawl_timeout_seconds: int = 3
+    crawl_enabled: bool = True
 
-    # Demo logs path
+    # Demo / mock
+    demo_mode: bool = True
+
+    # Reporting / data
     logs_dir: str = "data"
+    reports_dir: str = "backend/reports"
 
     class Config:
         env_file = ".env"

@@ -25,13 +25,13 @@ def db_session():
 
 
 def test_classify_endpoint():
-    result = classify_endpoint("/api/v1/old-login", 0)
+    result = classify_endpoint("/api/v1/old-login", 0, source_type="traffic_log", documented=False, has_owner=False, version="v1")
     assert result["status"] == "zombie"
     assert result["risk_level"] in {"High", "Critical"}
 
 
 def test_security_analysis_flags():
-    res = analyze_api("/internal/debug", "http://example.com", has_auth=False, rate_limit=False)
+    res = analyze_api({"path": "/internal/debug", "requires_auth": False, "rate_limit_detected": False}, "http://example.com")
     types = [f[0] for f in res["findings"]]
     assert "missing_auth" in types
     assert "insecure_transport" in types
@@ -52,6 +52,7 @@ def test_run_scan_creates_records(db_session, monkeypatch):
 
     monkeypatch.setattr("app.services.orchestration.fetch_openapi_endpoints", fake_openapi)
     monkeypatch.setattr("app.services.orchestration.load_log_traffic", fake_logs)
+    monkeypatch.setattr("app.services.orchestration.crawl_endpoints", lambda *_args, **_kwargs: [])
 
     scan = run_scan(db_session, target, initiated_by=user.id, trigger_type="test", log_file=None)
     assert scan.total_apis == 1

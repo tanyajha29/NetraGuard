@@ -12,8 +12,15 @@ def rescan_active_targets(db: Session):
 
 
 def detect_transitions(db: Session):
-    # This is a placeholder for comparing previous scan summaries.
-    history = db.query(models.ScanRun).order_by(models.ScanRun.created_at.desc()).limit(2).all()
+    """
+    Compare the two most recent scan runs for drift in zombie/shadow counts.
+    """
+    history = (
+        db.query(models.ScanRun)
+        .order_by(models.ScanRun.created_at.desc())
+        .limit(2)
+        .all()
+    )
     if len(history) < 2:
         return []
     latest, previous = history[0], history[1]
@@ -22,4 +29,8 @@ def detect_transitions(db: Session):
         transitions.append("new_zombie_detected")
     if latest.shadow_count > previous.shadow_count:
         transitions.append("new_shadow_detected")
+    if latest.total_apis > previous.total_apis:
+        transitions.append("new_api_detected")
+    if latest.active_count < previous.active_count:
+        transitions.append("traffic_drop_or_deactivation")
     return transitions

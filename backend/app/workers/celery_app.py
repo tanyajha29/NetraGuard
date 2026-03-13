@@ -12,6 +12,6 @@ celery_app = Celery(
 celery_app.conf.beat_schedule = {
     "scheduled-rescan": {
         "task": "app.workers.tasks.scheduled_rescan",
-        "schedule": 60.0 * 30,  # every 30 minutes
+        "schedule": 60.0 * settings.scheduler_interval_minutes,  # configurable minutes
     }
 }
