@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { apiRequest, clearToken, setToken } from "../lib/api";
-import { useNavigate, NavigateFunction } from "react-router-dom";
+import { useNavigate, Navigate, NavigateFunction } from "react-router-dom";
 
 export type User = {
   id: number;
@@ -69,6 +69,6 @@ export const useAuth = () => {
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return <div className="page">Loading...</div>;
-  if (!user) return <div className="page">Please login to continue.</div>;
+  if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
