@@ -12,6 +12,7 @@ from app.services.classification import classify_endpoint
 from app.services.security_analysis import analyze_api
 from app.services.orchestration import run_scan
 from app.services.reporting import render_report
+from app.services.discovery import fetch_openapi_endpoints
 
 
 @pytest.fixture(scope="function")
@@ -79,3 +80,26 @@ def test_render_report(tmp_path, db_session):
     db_session.commit()
     path = render_report(scan, [], [])
     assert os.path.exists(path)
+
+
+def test_fetch_openapi_endpoints(monkeypatch):
+    sample_spec = {
+        "paths": {
+            "/secure": {"get": {"security": [{"bearerAuth": []}], "summary": "secure op"}},
+            "/public": {"get": {"summary": "public op"}},
+        },
+        "security": [{"bearerAuth": []}],
+    }
+
+    class DummyResponse:
+        def json(self):
+            return sample_spec
+
+        def raise_for_status(self):
+            return None
+
+    monkeypatch.setattr("app.services.discovery.requests.get", lambda *_args, **_kwargs: DummyResponse())
+    endpoints = fetch_openapi_endpoints("http://example.com")
+    assert len(endpoints) == 2
+    secure = next(e for e in endpoints if e["path"] == "/secure")
+    assert secure["requires_auth"] is True

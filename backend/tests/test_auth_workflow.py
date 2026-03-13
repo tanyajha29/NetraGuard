@@ -7,7 +7,10 @@ os.environ["DATABASE_URL_OVERRIDE"] = "sqlite:///:memory:"
 
 from app.db.base import Base
 from app import models
-from app.core.security import get_password_hash, verify_password
+from jose import jwt
+
+from app.core.security import get_password_hash, verify_password, create_access_token
+from app.core.config import get_settings
 
 
 @pytest.fixture()
@@ -40,3 +43,9 @@ def test_workflow_creation(db_session):
     db_session.commit()
     assert wf.id is not None
     assert wf.workflow_status == models.WorkflowStatus.pending_review
+
+
+def test_jwt_roundtrip():
+    token = create_access_token({"sub": "123"})
+    payload = jwt.decode(token, get_settings().secret_key, algorithms=["HS256"])
+    assert payload["sub"] == "123"
