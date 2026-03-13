@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { ScanProgress } from "@/components/scans/scan-progress"
 import { Button } from "@/components/ui/button"
@@ -12,82 +12,93 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  Server,
-  Globe,
-  Database,
 } from "lucide-react"
+import { apiFetch } from "@/lib/api"
 
-interface ScanResult {
-  id: string
-  target: string
-  source: string
-  duration: string
-  status: "completed" | "running" | "failed"
-  findings: number
-  timestamp: string
+type Target = { id: number; name: string; base_url: string }
+type ScanRow = {
+  id: number
+  target_id: number
+  status: string
+  started_at: string
+  ended_at: string | null
+  total_apis: number
+  created_at: string
 }
-
-const scanHistory: ScanResult[] = [
-  { id: "1", target: "api.production.com", source: "Gateway Logs", duration: "4m 32s", status: "completed", findings: 23, timestamp: "Today, 10:45 AM" },
-  { id: "2", target: "staging.internal.io", source: "Traffic Analysis", duration: "2m 18s", status: "completed", findings: 8, timestamp: "Today, 09:30 AM" },
-  { id: "3", target: "legacy-api.corp.net", source: "Code Repository", duration: "6m 45s", status: "completed", findings: 47, timestamp: "Yesterday, 04:15 PM" },
-  { id: "4", target: "partner-api.external", source: "DNS Records", duration: "1m 55s", status: "failed", findings: 0, timestamp: "Yesterday, 02:00 PM" },
-  { id: "5", target: "mobile-api.app.io", source: "Gateway Logs", duration: "3m 12s", status: "completed", findings: 15, timestamp: "Yesterday, 11:30 AM" },
-  { id: "6", target: "dev.sandbox.local", source: "Network Scan", duration: "5m 08s", status: "completed", findings: 31, timestamp: "Mar 10, 2026" },
-]
-
-const scanTargets = [
-  { name: "Production APIs", icon: Server, count: 847, selected: true },
-  { name: "Internal Services", icon: Database, count: 234, selected: true },
-  { name: "External Partners", icon: Globe, count: 56, selected: false },
-]
 
 export default function ScansPage() {
   const [isScanning, setIsScanning] = useState(false)
   const [progress, setProgress] = useState(0)
   const [currentTarget, setCurrentTarget] = useState("")
+  const [targets, setTargets] = useState<Target[]>([])
+  const [selectedTarget, setSelectedTarget] = useState<number | null>(null)
+  const [newTarget, setNewTarget] = useState({ name: "", base_url: "" })
+  const [scanHistory, setScanHistory] = useState<ScanRow[]>([])
+  const [logFile, setLogFile] = useState("logs_test1.json")
 
-  const targets = [
-    "/api/v1/*",
-    "/api/v2/*",
-    "/api/internal/*",
-    "/api/admin/*",
-    "/api/webhooks/*",
-    "/api/legacy/*",
-  ]
+  // fetch targets & scans
+  useEffect(() => {
+    apiFetch<Target[]>("/api/v1/targets").then((t) => {
+      setTargets(t)
+      if (t.length) setSelectedTarget(t[0].id)
+    }).catch(() => setTargets([]))
+    apiFetch<ScanRow[]>("/api/v1/scans").then(setScanHistory).catch(() => setScanHistory([]))
+  }, [])
 
+  // fake progress UI while task runs
   useEffect(() => {
     if (!isScanning) return
-
     const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
+      setProgress((p) => {
+        if (p >= 100) {
           setIsScanning(false)
           return 0
         }
-        const targetIndex = Math.floor((prev / 100) * targets.length)
-        setCurrentTarget(targets[targetIndex] || targets[0])
-        return prev + 2
+        setCurrentTarget(`${selectedTarget ?? ""} :: ${logFile}`)
+        return p + 5
       })
     }, 200)
-
     return () => clearInterval(interval)
-  }, [isScanning])
+  }, [isScanning, selectedTarget, logFile])
 
-  const startScan = () => {
-    setProgress(0)
+  const startScan = async () => {
+    if (!selectedTarget) return
     setIsScanning(true)
+    setProgress(5)
+    try {
+      await apiFetch("/api/v1/scans/start", {
+        method: "POST",
+        body: JSON.stringify({ target_id: selectedTarget, trigger_type: "manual", log_file: logFile }),
+      })
+      const latest = await apiFetch<ScanRow[]>("/api/v1/scans")
+      setScanHistory(latest)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsScanning(false)
+    }
+  }
+
+  const createTarget = async () => {
+    if (!newTarget.name || !newTarget.base_url) return
+    await apiFetch("/api/v1/targets", {
+      method: "POST",
+      body: JSON.stringify({ ...newTarget, is_active: true }),
+    })
+    const refreshed = await apiFetch<Target[]>("/api/v1/targets")
+    setTargets(refreshed)
+    setSelectedTarget(refreshed[0]?.id ?? null)
+    setNewTarget({ name: "", base_url: "" })
   }
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Discovery Scans</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Discover and catalog API endpoints across your infrastructure
+              Register targets and launch discovery/log scans
             </p>
           </div>
           <Button
@@ -113,53 +124,56 @@ export default function ScansPage() {
           </Button>
         </div>
 
-        {/* Scan Progress */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="glass-card p-4 rounded-xl border border-border/60 space-y-3">
+            <p className="text-sm text-muted-foreground">Select target</p>
+            <select
+              className="w-full h-10 rounded-lg bg-muted/50 border border-border px-3 text-foreground"
+              value={selectedTarget ?? ""}
+              onChange={(e) => setSelectedTarget(Number(e.target.value))}
+            >
+              {targets.map((t) => (
+                <option key={t.id} value={t.id}>{t.name} ({t.base_url})</option>
+              ))}
+            </select>
+            <p className="text-sm text-muted-foreground">Log file (demo)</p>
+            <select
+              className="w-full h-10 rounded-lg bg-muted/50 border border-border px-3 text-foreground"
+              value={logFile}
+              onChange={(e) => setLogFile(e.target.value)}
+            >
+              <option value="logs_test1.json">logs_test1.json</option>
+              <option value="logs_test2.json">logs_test2.json</option>
+              <option value="logs_test3.json">logs_test3.json</option>
+            </select>
+          </div>
+
+          <div className="glass-card p-4 rounded-xl border border-border/60 space-y-2 md:col-span-2">
+            <p className="text-sm text-muted-foreground">Register new target</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <input
+                className="h-10 rounded-lg bg-muted/50 border border-border px-3 text-foreground"
+                placeholder="Name"
+                value={newTarget.name}
+                onChange={(e) => setNewTarget({ ...newTarget, name: e.target.value })}
+              />
+              <input
+                className="h-10 rounded-lg bg-muted/50 border border-border px-3 text-foreground"
+                placeholder="Base URL (http://localhost:8100)"
+                value={newTarget.base_url}
+                onChange={(e) => setNewTarget({ ...newTarget, base_url: e.target.value })}
+              />
+              <Button onClick={createTarget} className="h-10">Save Target</Button>
+            </div>
+          </div>
+        </div>
+
         <ScanProgress
           isScanning={isScanning}
           progress={progress}
           currentTarget={currentTarget}
         />
 
-        {/* Scan Targets */}
-        <div className="grid grid-cols-3 gap-4">
-          {scanTargets.map((target) => (
-            <div
-              key={target.name}
-              className={cn(
-                "glass-card rounded-xl p-4 border cursor-pointer transition-all",
-                target.selected
-                  ? "border-primary/50 bg-primary/5"
-                  : "border-border/50 hover:border-primary/30"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={cn(
-                    "p-2 rounded-lg",
-                    target.selected ? "bg-primary/20" : "bg-muted"
-                  )}
-                >
-                  <target.icon
-                    className={cn(
-                      "w-5 h-5",
-                      target.selected ? "text-primary" : "text-muted-foreground"
-                    )}
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {target.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {target.count} endpoints
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Scan History */}
         <div className="space-y-4">
           <h2 className="text-lg font-medium text-foreground">Scan History</h2>
           <div className="glass-card rounded-xl border border-border/50 overflow-hidden">
@@ -173,86 +187,57 @@ export default function ScansPage() {
                     Target
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Source
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Duration
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Findings
+                    Total APIs
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Timestamp
+                    Started
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Finished
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/30">
                 {scanHistory.map((scan) => (
-                  <tr
-                    key={scan.id}
-                    className="hover:bg-primary/5 transition-colors"
-                  >
+                  <tr key={scan.id} className="hover:bg-primary/5 transition-colors">
                     <td className="px-4 py-3">
-                      <code className="text-sm font-mono text-primary">
-                        SCN-{scan.id.padStart(4, "0")}
-                      </code>
+                      <code className="text-sm font-mono text-primary">SCN-{String(scan.id).padStart(4, "0")}</code>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-sm text-foreground">{scan.target}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-sm text-muted-foreground">{scan.source}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <Clock className="w-3.5 h-3.5" />
-                        {scan.duration}
-                      </div>
+                      <span className="text-sm text-foreground">
+                        {targets.find((t) => t.id === scan.target_id)?.name || `Target #${scan.target_id}`}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       <div
                         className={cn(
                           "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium",
-                          scan.status === "completed" &&
-                            "bg-success/10 text-success",
-                          scan.status === "running" &&
-                            "bg-primary/10 text-primary",
-                          scan.status === "failed" &&
-                            "bg-critical/10 text-critical"
+                          scan.status === "completed" && "bg-success/10 text-success",
+                          scan.status === "running" && "bg-primary/10 text-primary",
+                          scan.status !== "completed" && scan.status !== "running" && "bg-critical/10 text-critical"
                         )}
                       >
-                        {scan.status === "completed" && (
-                          <CheckCircle className="w-3 h-3" />
-                        )}
-                        {scan.status === "running" && (
-                          <Radar className="w-3 h-3 animate-spin" />
-                        )}
-                        {scan.status === "failed" && (
-                          <AlertCircle className="w-3 h-3" />
-                        )}
-                        {scan.status.charAt(0).toUpperCase() + scan.status.slice(1)}
+                        {scan.status === "completed" && <CheckCircle className="w-3 h-3" />}
+                        {scan.status === "running" && <Radar className="w-3 h-3 animate-spin" />}
+                        {scan.status !== "completed" && scan.status !== "running" && <AlertCircle className="w-3 h-3" />}
+                        {scan.status}
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={cn(
-                          "text-sm font-mono",
-                          scan.findings > 20
-                            ? "text-warning"
-                            : scan.findings > 0
-                            ? "text-foreground"
-                            : "text-muted-foreground"
-                        )}
-                      >
-                        {scan.findings}
-                      </span>
+                      <span className="text-sm font-mono">{scan.total_apis ?? 0}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <Clock className="w-3.5 h-3.5" />
+                        {scan.started_at ? new Date(scan.started_at).toLocaleString() : "—"}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-sm text-muted-foreground">
-                        {scan.timestamp}
+                        {scan.ended_at ? new Date(scan.ended_at).toLocaleString() : "—"}
                       </span>
                     </td>
                   </tr>

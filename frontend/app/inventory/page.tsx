@@ -1,42 +1,45 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { ApiTable, ApiEndpoint } from "@/components/inventory/api-table"
 import { ApiDetailPanel } from "@/components/inventory/api-detail-panel"
 import { Search, Filter, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-const apiData: ApiEndpoint[] = [
-  { id: "1", endpoint: "/api/v2/users", method: "GET", traffic: 15420, status: "active", risk: "safe", lastUsed: "Just now", source: "Gateway" },
-  { id: "2", endpoint: "/api/v2/users/:id", method: "GET", traffic: 8230, status: "active", risk: "low", lastUsed: "2 min ago", source: "Gateway" },
-  { id: "3", endpoint: "/api/v1/payments/process", method: "POST", traffic: 3450, status: "active", risk: "medium", lastUsed: "5 min ago", source: "Gateway" },
-  { id: "4", endpoint: "/api/v1/payments/legacy", method: "POST", traffic: 12, status: "zombie", risk: "critical", lastUsed: "94 days ago", source: "Discovery" },
-  { id: "5", endpoint: "/api/internal/debug", method: "GET", traffic: 0, status: "shadow", risk: "critical", lastUsed: "Never", source: "Scan" },
-  { id: "6", endpoint: "/api/v2/orders", method: "GET", traffic: 6780, status: "active", risk: "safe", lastUsed: "Just now", source: "Gateway" },
-  { id: "7", endpoint: "/api/v2/orders", method: "POST", traffic: 2340, status: "active", risk: "low", lastUsed: "1 min ago", source: "Gateway" },
-  { id: "8", endpoint: "/api/v1/auth/login", method: "POST", traffic: 4560, status: "deprecated", risk: "medium", lastUsed: "10 min ago", source: "Gateway" },
-  { id: "9", endpoint: "/api/v2/auth/login", method: "POST", traffic: 12400, status: "active", risk: "safe", lastUsed: "Just now", source: "Gateway" },
-  { id: "10", endpoint: "/api/admin/users", method: "DELETE", traffic: 45, status: "active", risk: "high", lastUsed: "1 hour ago", source: "Gateway" },
-  { id: "11", endpoint: "/api/v1/reports/export", method: "GET", traffic: 890, status: "deprecated", risk: "medium", lastUsed: "2 hours ago", source: "Gateway" },
-  { id: "12", endpoint: "/api/webhooks/stripe", method: "POST", traffic: 1230, status: "active", risk: "low", lastUsed: "30 sec ago", source: "Gateway" },
-  { id: "13", endpoint: "/api/internal/metrics", method: "GET", traffic: 5, status: "shadow", risk: "high", lastUsed: "Unknown", source: "Scan" },
-  { id: "14", endpoint: "/api/v0/legacy/search", method: "GET", traffic: 3, status: "zombie", risk: "critical", lastUsed: "120 days ago", source: "Discovery" },
-  { id: "15", endpoint: "/api/v2/products", method: "GET", traffic: 9870, status: "active", risk: "safe", lastUsed: "Just now", source: "Gateway" },
-]
+import { apiFetch } from "@/lib/api"
 
 export default function InventoryPage() {
   const [selectedApi, setSelectedApi] = useState<ApiEndpoint | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [apiData, setApiData] = useState<ApiEndpoint[]>([])
 
-  const filteredData = apiData.filter((api) =>
-    api.endpoint.toLowerCase().includes(searchQuery.toLowerCase())
+  useEffect(() => {
+    apiFetch<ApiEndpoint[]>("/api/v1/inventory")
+      .then((data) =>
+        setApiData(
+          data.map((item) => ({
+            id: String(item.id),
+            endpoint: item.path,
+            method: item.method,
+            traffic: item.traffic_count,
+            status: item.current_status as any,
+            risk: item.risk_level.toLowerCase() as any,
+            lastUsed: item.last_seen_at ?? "Unknown",
+            source: item.source_type ?? "scan",
+          }))
+        )
+      )
+      .catch(() => setApiData([]))
+  }, [])
+
+  const filteredData = useMemo(
+    () => apiData.filter((api) => api.endpoint.toLowerCase().includes(searchQuery.toLowerCase())),
+    [apiData, searchQuery]
   )
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">API Inventory</h1>
@@ -56,7 +59,6 @@ export default function InventoryPage() {
           </div>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-4 gap-4">
           <div className="glass-card rounded-lg p-4 border border-border/50">
             <p className="text-2xl font-bold font-mono text-foreground">{apiData.length}</p>
@@ -82,7 +84,6 @@ export default function InventoryPage() {
           </div>
         </div>
 
-        {/* Search */}
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
@@ -94,14 +95,11 @@ export default function InventoryPage() {
           />
         </div>
 
-        {/* Table */}
         <ApiTable data={filteredData} onRowClick={setSelectedApi} />
       </div>
 
-      {/* Detail Panel */}
       <ApiDetailPanel api={selectedApi} onClose={() => setSelectedApi(null)} />
 
-      {/* Overlay */}
       {selectedApi && (
         <div
           className="fixed inset-0 bg-background/50 backdrop-blur-sm z-40"
