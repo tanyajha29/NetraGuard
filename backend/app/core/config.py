@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     secret_key: str = Field(default_factory=lambda: secrets.token_urlsafe(32))
     access_token_expire_minutes: int = 60 * 12
 
+    # frontend-only envs (ignored by backend logic but allowed for shared .env)
+    vite_api_url: str | None = None
+    next_public_api_url: str | None = None
+
     # Database
     database_url_override: str | None = None
     postgres_host: str = "postgres"
@@ -54,6 +58,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
     @property
     def database_url(self) -> str:
