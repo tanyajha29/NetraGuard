@@ -21,7 +21,6 @@ class Settings(BaseSettings):
 
     # Database
     database_url_override: str | None = None
-    database_url: str | None = None
     postgres_host: str = "postgres"
     postgres_port: int = 5432
     postgres_user: str = "netraguard"
@@ -65,8 +64,6 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         if self.database_url_override:
             return self.database_url_override
-        if self.database_url:
-            return self.database_url
         return (
             f"postgresql+psycopg2://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
