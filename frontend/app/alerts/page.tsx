@@ -74,15 +74,20 @@ export default function AlertsPage() {
     apiFetch<any[]>("/api/v1/alerts")
       .then((data) =>
         setAlerts(
-          data.map((a) => ({
-            id: String(a.id),
-            type: (a.alert_type || "security") as Alert["type"],
-            severity: a.severity === "high" ? "critical" : a.severity === "medium" ? "warning" : "info",
+          (Array.isArray(data) ? data : []).map((a) => ({
+            id: String(a.id ?? crypto.randomUUID()),
+            type: ((a.alert_type || "security") as Alert["type"]) ?? "security",
+            severity:
+              a.severity === "high"
+                ? "critical"
+                : a.severity === "medium"
+                ? "warning"
+                : "info",
             title: a.alert_type || "Alert",
             description: a.message || "",
             endpoint: a.api_asset_id ? `Asset #${a.api_asset_id}` : "n/a",
             timestamp: new Date(a.created_at || Date.now()).toLocaleString(),
-            status: (a.status || "open") as Alert["status"],
+            status: ((a.status || "open") as Alert["status"]) ?? "open",
           }))
         )
       )
@@ -174,8 +179,8 @@ export default function AlertsPage() {
 
           <div className="space-y-4">
             {filteredAlerts.map((alert) => {
-              const config = severityConfig[alert.severity]
-              const TypeIcon = typeIcons[alert.type]
+              const config = severityConfig[alert.severity] || severityConfig.info
+              const TypeIcon = typeIcons[alert.type] || typeIcons.security
 
               return (
                 <div
