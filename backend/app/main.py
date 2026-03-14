@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
 from app.api.v1.routes import api_router
+from app.api.v1.routes import dashboard as dashboard_routes
 from sqlalchemy.orm import Session
 
 from app.db.session import engine, SessionLocal
@@ -35,6 +36,8 @@ def create_app() -> FastAPI:
         seed_demo_data()
 
     app.include_router(api_router, prefix=settings.api_v1_str)
+    # Explicitly ensure dashboard summary endpoints are registered even if a grouped router import fails.
+    app.include_router(dashboard_routes.router, prefix=f"{settings.api_v1_str}/dashboard", tags=["dashboard"])
     return app
 
 
