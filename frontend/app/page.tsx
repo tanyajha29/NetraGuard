@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { apiFetch } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
+import { useMemo } from "react"
 
 type AlertItem = {
   id: number
@@ -30,23 +31,37 @@ type Asset = {
   current_status: string
   risk_level: string
   traffic_count: number
+  risk_score?: number
+  path: string
 }
 
 export default function DashboardPage() {
   const { toast } = useToast()
   const [alerts, setAlerts] = useState<AlertItem[]>([])
   const [inventory, setInventory] = useState<Asset[]>([])
+  const [riskCounts, setRiskCounts] = useState<Record<string, number>>({})
+  const [trafficPoints, setTrafficPoints] = useState<{ label: string; requests: number }[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [inv, al] = await Promise.all([
+        const [inv, al, riskResp, trafficResp] = await Promise.all([
           apiFetch<Asset[]>("/api/v1/inventory"),
           apiFetch<AlertItem[]>("/api/v1/alerts"),
+          apiFetch<Record<string, number>>("/api/v1/dashboard/risk").catch(() => ({})),
+          apiFetch<{ path: string; count: number }[]>("/api/v1/dashboard/traffic").catch(() => []),
         ])
         setInventory(inv)
         setAlerts(al)
+        setRiskCounts(riskResp || {})
+        setTrafficPoints(
+          (trafficResp || []).map((t, idx) => ({
+            label: t.path || `slot-${idx}`,
+            requests: t.count || 0,
+            errors: Math.max(0, Math.floor((t.count || 0) * 0.05)),
+          }))
+        )
       } catch (err: any) {
         toast({ title: "Failed to load data", description: err.message, variant: "destructive" })
       } finally {
@@ -63,6 +78,32 @@ export default function DashboardPage() {
     const shadow = inventory.filter((i) => i.current_status === "shadow").length
     const highRisk = inventory.filter((i) => ["High", "Critical", "high", "critical"].includes(i.risk_level)).length
     return { total, active, zombie, shadow, highRisk }
+  }, [inventory])
+
+  const distributionData = useMemo(() => {
+    const counts: Record<string, number> = { Active: 0, Deprecated: 0, Shadow: 0, Zombie: 0 }
+    inventory.forEach((i) => {
+      const status = i.current_status?.toLowerCase()
+      if (status === "deprecated") counts.Deprecated += 1
+      else if (status === "shadow") counts.Shadow += 1
+      else if (status === "zombie") counts.Zombie += 1
+      else counts.Active += 1
+    })
+    return [
+      { name: "Active", value: counts.Active, color: "oklch(0.68 0.17 145)" },
+      { name: "Deprecated", value: counts.Deprecated, color: "oklch(0.78 0.16 75)" },
+      { name: "Shadow", value: counts.Shadow, color: "oklch(0.75 0.15 50)" },
+      { name: "Zombie", value: counts.Zombie, color: "oklch(0.62 0.22 25)" },
+    ]
+  }, [inventory])
+
+  const heatmapData = useMemo(() => {
+    return inventory.slice(0, 20).map((asset, idx) => ({
+      id: String(asset.id || idx),
+      name: asset.path || asset.current_status || "api",
+      risk: asset.risk_score || (asset.risk_level?.toLowerCase().includes("high") ? 80 : 40),
+      category: asset.current_status || "Unknown",
+    }))
   }, [inventory])
 
   return (
@@ -124,10 +165,10 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Charts */}
           <div className="lg:col-span-2 space-y-6">
-            <ApiTrafficChart />
+            <ApiTrafficChart data={trafficPoints} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <RiskHeatmap />
-              <ApiDistributionChart />
+              <RiskHeatmap data={heatmapData} />
+              <ApiDistributionChart data={distributionData} />
             </div>
           </div>
 

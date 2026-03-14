@@ -2,15 +2,17 @@
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 
-const data = [
-  { name: "Active", value: 847, color: "oklch(0.68 0.17 145)" },
-  { name: "Deprecated", value: 124, color: "oklch(0.78 0.16 75)" },
-  { name: "Shadow", value: 67, color: "oklch(0.75 0.15 50)" },
-  { name: "Zombie", value: 23, color: "oklch(0.62 0.22 25)" },
+type Slice = { name: string; value: number; color: string }
+
+const fallback: Slice[] = [
+  { name: "Active", value: 10, color: "oklch(0.68 0.17 145)" },
+  { name: "Deprecated", value: 2, color: "oklch(0.78 0.16 75)" },
+  { name: "Shadow", value: 3, color: "oklch(0.75 0.15 50)" },
+  { name: "Zombie", value: 1, color: "oklch(0.62 0.22 25)" },
 ]
 
-export function ApiDistributionChart() {
-  const total = data.reduce((acc, item) => acc + item.value, 0)
+export function ApiDistributionChart({ data = fallback }: { data?: Slice[] }) {
+  const total = data.reduce((acc, item) => acc + item.value, 0) || 1
 
   return (
     <div className="glass-card rounded-xl p-5 border border-border/50 animate-fade-up">

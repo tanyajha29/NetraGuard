@@ -9,22 +9,24 @@ import {
   YAxis,
 } from "recharts"
 
-const data = [
-  { time: "00:00", requests: 2400, errors: 120 },
-  { time: "02:00", requests: 1398, errors: 80 },
-  { time: "04:00", requests: 980, errors: 40 },
-  { time: "06:00", requests: 3908, errors: 150 },
-  { time: "08:00", requests: 4800, errors: 200 },
-  { time: "10:00", requests: 3800, errors: 180 },
-  { time: "12:00", requests: 4300, errors: 220 },
-  { time: "14:00", requests: 5200, errors: 280 },
-  { time: "16:00", requests: 4900, errors: 240 },
-  { time: "18:00", requests: 4100, errors: 190 },
-  { time: "20:00", requests: 3200, errors: 140 },
-  { time: "22:00", requests: 2800, errors: 100 },
+type TrafficPoint = { label: string; requests: number; errors?: number }
+
+const fallbackData: TrafficPoint[] = [
+  { label: "00:00", requests: 2400, errors: 120 },
+  { label: "02:00", requests: 1398, errors: 80 },
+  { label: "04:00", requests: 980, errors: 40 },
+  { label: "06:00", requests: 3908, errors: 150 },
+  { label: "08:00", requests: 4800, errors: 200 },
+  { label: "10:00", requests: 3800, errors: 180 },
+  { label: "12:00", requests: 4300, errors: 220 },
+  { label: "14:00", requests: 5200, errors: 280 },
+  { label: "16:00", requests: 4900, errors: 240 },
+  { label: "18:00", requests: 4100, errors: 190 },
+  { label: "20:00", requests: 3200, errors: 140 },
+  { label: "22:00", requests: 2800, errors: 100 },
 ]
 
-export function ApiTrafficChart() {
+export function ApiTrafficChart({ data = fallbackData }: { data?: TrafficPoint[] }) {
   return (
     <div className="glass-card rounded-xl p-5 border border-border/50 animate-fade-up">
       <div className="flex items-center justify-between mb-4">
@@ -73,7 +75,7 @@ export function ApiTrafficChart() {
               </linearGradient>
             </defs>
             <XAxis
-              dataKey="time"
+              dataKey="label"
               axisLine={false}
               tickLine={false}
               tick={{ fill: "oklch(0.65 0.01 240)", fontSize: 11 }}
