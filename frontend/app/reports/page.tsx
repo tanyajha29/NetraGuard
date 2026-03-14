@@ -63,7 +63,21 @@ export default function ReportsPage() {
         )
       )
       .catch((err: any) =>
-        toast({ title: "Failed to load reports", description: err.message, variant: "destructive" })
+        {
+          toast({ title: "Loaded demo reports (backend unreachable)", description: err.message, variant: "default" })
+          setReports([
+            {
+              id: "demo-1",
+              name: "Demo Scan Report",
+              description: "Automated scan report for Mock Target",
+              type: "security",
+              format: "PDF",
+              lastGenerated: new Date().toLocaleDateString(),
+              schedule: "Weekly",
+              target_id: 1,
+            },
+          ] as any)
+        }
       )
   }, [toast])
 

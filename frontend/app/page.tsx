@@ -73,7 +73,34 @@ export default function DashboardPage() {
       )
       if (summaryResp) setSummary(summaryResp)
     } catch (err: any) {
-      toast({ title: "Failed to load data", description: err.message, variant: "destructive" })
+      // Fallback dummy data for offline / 404 states
+      const dummyInv: Asset[] = [
+        { id: 1, current_status: "active", risk_level: "Medium", traffic_count: 1200, path: "/api/v1/users" },
+        { id: 2, current_status: "zombie", risk_level: "High", traffic_count: 12, path: "/api/v1/old-login" },
+        { id: 3, current_status: "shadow", risk_level: "High", traffic_count: 42, path: "/api/internal/debug" },
+        { id: 4, current_status: "active", risk_level: "Low", traffic_count: 980, path: "/api/v1/payments" },
+      ]
+      const dummyAlerts: AlertItem[] = [
+        { id: 1, message: "Zombie API detected", severity: "critical", api_asset_id: 2, alert_type: "zombie" },
+        { id: 2, message: "Shadow API exposure", severity: "warning", api_asset_id: 3, alert_type: "shadow" },
+      ]
+      setInventory(dummyInv)
+      setAlerts(dummyAlerts)
+      setRiskCounts({ Critical: 1, High: 1, Medium: 1, Low: 1 })
+      setTrafficPoints([
+        { label: "/api/v1/users", requests: 1200 },
+        { label: "/api/v1/payments", requests: 980 },
+        { label: "/api/internal/debug", requests: 42 },
+        { label: "/api/v1/old-login", requests: 12 },
+      ])
+      setSummary({
+        total_apis: 4,
+        active_apis: 2,
+        zombie_apis: 1,
+        shadow_apis: 1,
+        critical_findings: 2,
+      })
+      toast({ title: "Loaded demo data (backend unreachable)", description: err?.message, variant: "default" })
     } finally {
       setLoading(false)
     }
