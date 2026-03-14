@@ -2,6 +2,14 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# OS deps for WeasyPrint (cairo/pango/gobject) and common build tools
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 \
+        libffi8 libssl3 libxml2 libxslt1.1 libharfbuzz0b libfribidi0 \
+        fonts-dejavu-core wget curl gnupg && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 

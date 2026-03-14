@@ -1,0 +1,1098 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { font-family: Arial, sans-serif; color:#0f172a; margin:24px; }
+    h1,h2,h3 { color:#0b1120; }
+    table { width:100%; border-collapse: collapse; margin-top:12px; }
+    th, td { border:1px solid #e5e7eb; padding:8px; font-size:13px; }
+    th { background:#f8fafc; text-align:left; }
+    .pill { padding:4px 8px; border-radius:12px; font-size:11px; }
+  </style>
+</head>
+<body>
+  <h1>NetraGuard Scan Report</h1>
+  <p><strong>Scan ID:</strong> 4 | <strong>Target:</strong> 2 | <strong>Started:</strong> 2026-03-14 10:21:16.300720 | <strong>Ended:</strong> 2026-03-14 10:21:39.220991</p>
+  <h2>Executive Summary</h2>
+  <ul>
+    <li>Total APIs: 47</li>
+    <li>Active: 0 | Deprecated: 0 | Shadow: 10 | Zombie: 37</li>
+    <li>Findings: 218</li>
+  </ul>
+  <h2>Inventory</h2>
+  <table>
+    <thead><tr><th>Method</th><th>Path</th><th>Status</th><th>Risk</th><th>Traffic</th></tr></thead>
+    <tbody>
+      
+      <tr>
+        <td>POST</td><td>/api/v1/auth/register</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>POST</td><td>/api/v1/auth/login</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/auth/me</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/targets</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>POST</td><td>/api/v1/targets</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/targets/{target_id}</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>POST</td><td>/api/v1/scans/start</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/scans</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/scans/{scan_id}</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/scans/{scan_id}/status</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/inventory</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/inventory/{asset_id}</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/apis</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/apis/{api_id}</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/apis/{api_id}/traffic</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/apis/{api_id}/security</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/findings</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/alerts</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>PATCH</td><td>/api/v1/alerts/{alert_id}</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/reports</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/reports/{report_id}</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/reports/{report_id}/download</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>POST</td><td>/api/v1/reports/generate/{scan_id}</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/workflows</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>POST</td><td>/api/v1/workflows</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>PATCH</td><td>/api/v1/workflows/{workflow_id}</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/dashboard/summary</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/dashboard/traffic</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/dashboard/risk</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/zombie</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/security/summary</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/security/{api_id}</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/graph/dependencies</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/remediation/tasks</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>POST</td><td>/api/v1/remediation/start</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>PATCH</td><td>/api/v1/remediation/{task_id}</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/healthz</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/health</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/metrics</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/internal/debug</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/internal/health-raw</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/users</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/payments</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/transactions</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/old-login</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/test-api</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+      <tr>
+        <td>GET</td><td>/api/v1/dev-mock</td><td>orphaned</td><td>Critical</td><td>0</td>
+      </tr>
+      
+    </tbody>
+  </table>
+  <h2>Findings</h2>
+  <table>
+    <thead><tr><th>Severity</th><th>Title</th><th>Description</th><th>Recommendation</th></tr></thead>
+    <tbody>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>POST /api/v1/auth/register missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>POST /api/v1/auth/register classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>POST /api/v1/auth/login missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>POST /api/v1/auth/login classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/auth/me missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/auth/me classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/targets missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/targets classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>POST /api/v1/targets missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>POST /api/v1/targets classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/targets/{target_id} missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/targets/{target_id} classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>POST /api/v1/scans/start missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>POST /api/v1/scans/start classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/scans missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/scans classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/scans/{scan_id} missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/scans/{scan_id} classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/scans/{scan_id}/status missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/scans/{scan_id}/status classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/inventory missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/inventory classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/inventory/{asset_id} missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/inventory/{asset_id} classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/apis missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/apis classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/apis/{api_id} missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/apis/{api_id} classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/apis/{api_id}/traffic missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/apis/{api_id}/traffic classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/apis/{api_id}/security missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/apis/{api_id}/security classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/findings missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/findings classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/alerts missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/alerts classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>PATCH /api/v1/alerts/{alert_id} missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>PATCH /api/v1/alerts/{alert_id} classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/reports missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/reports classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/reports/{report_id} missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/reports/{report_id} classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/reports/{report_id}/download missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/reports/{report_id}/download classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>POST /api/v1/reports/generate/{scan_id} missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>POST /api/v1/reports/generate/{scan_id} classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/workflows missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/workflows classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>POST /api/v1/workflows missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>POST /api/v1/workflows classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>PATCH /api/v1/workflows/{workflow_id} missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>PATCH /api/v1/workflows/{workflow_id} classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/dashboard/summary missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/dashboard/summary classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/dashboard/traffic missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/dashboard/traffic classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/dashboard/risk missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/dashboard/risk classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/zombie missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/zombie classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/security/summary missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/security/summary classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/security/{api_id} missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/security/{api_id} classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/graph/dependencies missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/graph/dependencies classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/remediation/tasks missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/remediation/tasks classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>POST /api/v1/remediation/start missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>POST /api/v1/remediation/start classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>PATCH /api/v1/remediation/{task_id} missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>PATCH /api/v1/remediation/{task_id} classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/healthz missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked zombie</td><td>GET /api/v1/healthz classified as zombie</td><td>Decommission immediately – no traffic detected</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /health missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked shadow</td><td>GET /health classified as shadow</td><td>Restrict access – undocumented/internal API exposed</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /metrics missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked shadow</td><td>GET /metrics classified as shadow</td><td>Restrict access – undocumented/internal API exposed</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /internal/debug missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked shadow</td><td>GET /internal/debug classified as shadow</td><td>Restrict access – undocumented/internal API exposed</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Internal/debug path exposed</td><td>Internal/debug path exposed</td><td>Restrict to internal networks</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /internal/health-raw missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked shadow</td><td>GET /internal/health-raw classified as shadow</td><td>Restrict access – undocumented/internal API exposed</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Internal/debug path exposed</td><td>Internal/debug path exposed</td><td>Restrict to internal networks</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/users missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked shadow</td><td>GET /api/v1/users classified as shadow</td><td>Restrict access – undocumented/internal API exposed</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/payments missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked shadow</td><td>GET /api/v1/payments classified as shadow</td><td>Restrict access – undocumented/internal API exposed</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/transactions missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked shadow</td><td>GET /api/v1/transactions classified as shadow</td><td>Restrict access – undocumented/internal API exposed</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/old-login missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked shadow</td><td>GET /api/v1/old-login classified as shadow</td><td>Restrict access – undocumented/internal API exposed</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/test-api missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked shadow</td><td>GET /api/v1/test-api classified as shadow</td><td>Restrict access – undocumented/internal API exposed</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Internal/debug path exposed</td><td>Internal/debug path exposed</td><td>Restrict to internal networks</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>Orphaned API</td><td>GET /api/v1/dev-mock missing owner metadata</td><td>Assign an owner in the CMDB and update service catalog.</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>API marked shadow</td><td>GET /api/v1/dev-mock classified as shadow</td><td>Restrict access – undocumented/internal API exposed</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>Authentication missing</td><td>Authentication missing</td><td>Protect with JWT/api keys</td>
+      </tr>
+      
+      <tr>
+        <td>high</td><td>HTTPS not enforced</td><td>HTTPS not enforced</td><td>Terminate TLS at gateway</td>
+      </tr>
+      
+      <tr>
+        <td>medium</td><td>No rate limiting detected</td><td>No rate limiting detected</td><td>Add rate limits</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</body>
+</html>

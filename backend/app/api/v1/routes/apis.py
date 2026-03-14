@@ -12,7 +12,7 @@ def list_apis(db: Session = Depends(get_db), status: str | None = None, risk: st
     if status:
         q = q.filter(models.APIAsset.current_status == status)
     if risk:
-        q = q.filter(models.APIAsset.risk_level.ilike(f\"%{risk}%\"))
+        q = q.filter(models.APIAsset.risk_level.ilike(f"%{risk}%"))
     return q.order_by(models.APIAsset.last_seen_at.desc()).all()
 
 

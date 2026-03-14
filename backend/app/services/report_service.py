@@ -1,7 +1,6 @@
 import os
 from typing import List
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from weasyprint import HTML
 from app.core.config import get_settings
 from app import models
 
@@ -19,5 +18,13 @@ def render_report(scan: models.ScanRun, assets: List[models.APIAsset], findings:
     template = env.get_template("report.html")
     html_content = template.render(scan=scan, assets=assets, findings=findings, settings=settings)
     file_path = os.path.join(settings.reports_dir, f"scan_{scan.id}.pdf")
-    HTML(string=html_content).write_pdf(file_path)
-    return file_path
+    try:
+        from weasyprint import HTML  # late import to avoid startup dependency issues
+        HTML(string=html_content).write_pdf(file_path)
+        return file_path
+    except Exception:
+        # graceful fallback: save HTML so download still works
+        fallback = os.path.join(settings.reports_dir, f"scan_{scan.id}.html")
+        with open(fallback, "w", encoding="utf-8") as f:
+            f.write(html_content)
+        return fallback

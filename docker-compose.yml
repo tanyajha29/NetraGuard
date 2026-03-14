@@ -10,12 +10,12 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"  # host:container (change host port to avoid local Postgres conflict)
 
   redis:
     image: redis:7
     ports:
-      - "6379:6379"
+      - "6380:6379"  # host:container (change host port to avoid conflicts)
 
   backend:
     build:

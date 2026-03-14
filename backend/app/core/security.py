@@ -11,7 +11,13 @@ from app.core.config import get_settings
 from app.db.session import get_db
 from app import models
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Prefer pbkdf2_sha256 for new hashes, but accept legacy bcrypt hashes so
+# previously seeded users can still log in.
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256", "bcrypt"],
+    default="pbkdf2_sha256",
+    deprecated="auto",
+)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 

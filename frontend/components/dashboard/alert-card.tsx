@@ -10,7 +10,7 @@ interface AlertCardProps {
   description: string
   endpoint: string
   timestamp: string
-  severity: AlertSeverity
+  severity: AlertSeverity | string
   action?: string
   className?: string
 }
@@ -24,7 +24,7 @@ export function AlertCard({
   action,
   className,
 }: AlertCardProps) {
-  const severityConfig = {
+  const severityConfig: Record<string, { icon: any; bgColor: string; borderColor: string; iconColor: string; glowClass: string }> = {
     critical: {
       icon: AlertCircle,
       bgColor: "bg-critical/10",
@@ -48,7 +48,8 @@ export function AlertCard({
     },
   }
 
-  const config = severityConfig[severity]
+  const key = (severity || "info").toString().toLowerCase()
+  const config = severityConfig[key] || severityConfig.info
   const Icon = config.icon
 
   return (

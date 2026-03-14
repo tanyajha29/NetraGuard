@@ -15,3 +15,6 @@ celery_app.conf.beat_schedule = {
         "schedule": 60.0 * settings.scheduler_interval_minutes,  # configurable minutes
     }
 }
+
+# ensure task modules are registered
+celery_app.autodiscover_tasks(["app.workers"])
