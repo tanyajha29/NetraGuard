@@ -14,6 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { apiFetch } from "@/lib/api"
+import { useToast } from "@/hooks/use-toast"
 
 type Target = { id: number; name: string; base_url: string }
 type ScanRow = {
@@ -35,47 +36,48 @@ export default function ScansPage() {
   const [newTarget, setNewTarget] = useState({ name: "", base_url: "" })
   const [scanHistory, setScanHistory] = useState<ScanRow[]>([])
   const [logFile, setLogFile] = useState("logs_test1.json")
+  const { toast } = useToast()
 
   // fetch targets & scans
   useEffect(() => {
     apiFetch<Target[]>("/api/v1/targets").then((t) => {
       setTargets(t)
-      if (t.length) setSelectedTarget(t[0].id)
+      if (t.length) {
+        setSelectedTarget(t[0].id)
+        setCurrentTarget(t[0].base_url || t[0].name)
+      }
     }).catch(() => setTargets([]))
     apiFetch<ScanRow[]>("/api/v1/scans").then(setScanHistory).catch(() => setScanHistory([]))
   }, [])
 
-  // fake progress UI while task runs
-  useEffect(() => {
-    if (!isScanning) return
-    const interval = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 100) {
-          setIsScanning(false)
-          return 0
-        }
-        setCurrentTarget(`${selectedTarget ?? ""} :: ${logFile}`)
-        return p + 5
-      })
-    }, 200)
-    return () => clearInterval(interval)
-  }, [isScanning, selectedTarget, logFile])
-
   const startScan = async () => {
     if (!selectedTarget) return
     setIsScanning(true)
-    setProgress(5)
+    setProgress(8)
+    const target = targets.find((t) => t.id === selectedTarget)
+    setCurrentTarget(target ? `${target.name} (${target.base_url})` : "")
     try {
-      await apiFetch("/api/v1/scans/start", {
+      const res = await apiFetch<{ scan_id?: number; message?: string }>("/api/v1/scans/start", {
         method: "POST",
         body: { target_id: selectedTarget, trigger_type: "manual", log_file: logFile },
       })
+      setProgress(65)
       const latest = await apiFetch<ScanRow[]>("/api/v1/scans")
       setScanHistory(latest)
+      setProgress(100)
+      toast({ title: res?.message || "Scan completed", description: res?.scan_id ? `Scan #${res.scan_id}` : undefined })
+      // notify other tabs/pages (dashboard) to refresh
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("netraguard-refresh"))
+      }
     } catch (err) {
       console.error(err)
+      toast({ title: "Failed to start scan", description: (err as Error).message, variant: "destructive" })
     } finally {
-      setIsScanning(false)
+      setTimeout(() => {
+        setIsScanning(false)
+        setProgress(0)
+      }, 400)
     }
   }
 

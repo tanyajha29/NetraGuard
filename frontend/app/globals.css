@@ -217,7 +217,7 @@
 }
 
 .animate-radar {
-  animation: radar 2s linear infinite;
+  animation: radar 6s linear infinite;
 }
 
 @keyframes slide-in-right {

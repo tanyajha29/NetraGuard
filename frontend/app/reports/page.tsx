@@ -115,8 +115,9 @@ export default function ReportsPage() {
         {/* Reports Grid */}
         <div className="grid grid-cols-2 gap-4">
           {reports.map((report) => {
-            const typeC = typeConfig[report.type]
-            const formatC = formatConfig[report.format]
+            const typeC = typeConfig[report.type] || typeConfig.security
+            const formatKey = (report.format || "PDF").toUpperCase() as keyof typeof formatConfig
+            const formatC = formatConfig[formatKey] || formatConfig.PDF
             const TypeIcon = typeC.icon
             const FormatIcon = formatC.icon
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useCallback } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { MetricCard } from "@/components/dashboard/metric-card"
 import { AlertCard } from "@/components/dashboard/alert-card"
@@ -16,7 +16,6 @@ import {
 } from "lucide-react"
 import { apiFetch } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
-import { useMemo } from "react"
 
 type AlertItem = {
   id: number
@@ -43,33 +42,41 @@ export default function DashboardPage() {
   const [trafficPoints, setTrafficPoints] = useState<{ label: string; requests: number }[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [inv, al, riskResp, trafficResp] = await Promise.all([
-          apiFetch<Asset[]>("/api/v1/inventory"),
-          apiFetch<AlertItem[]>("/api/v1/alerts"),
-          apiFetch<Record<string, number>>("/api/v1/dashboard/risk").catch(() => ({})),
-          apiFetch<{ path: string; count: number }[]>("/api/v1/dashboard/traffic").catch(() => []),
-        ])
-        setInventory(inv)
-        setAlerts(al)
-        setRiskCounts(riskResp || {})
-        setTrafficPoints(
-          (trafficResp || []).map((t, idx) => ({
-            label: t.path || `slot-${idx}`,
-            requests: t.count || 0,
-            errors: Math.max(0, Math.floor((t.count || 0) * 0.05)),
-          }))
-        )
-      } catch (err: any) {
-        toast({ title: "Failed to load data", description: err.message, variant: "destructive" })
-      } finally {
-        setLoading(false)
-      }
+  const load = useCallback(async () => {
+    try {
+      setLoading(true)
+      const [inv, al, riskResp, trafficResp] = await Promise.all([
+        apiFetch<Asset[]>("/api/v1/inventory"),
+        apiFetch<AlertItem[]>("/api/v1/alerts"),
+        apiFetch<Record<string, number>>("/api/v1/dashboard/risk").catch(() => ({})),
+        apiFetch<{ path: string; count: number }[]>("/api/v1/dashboard/traffic").catch(() => []),
+      ])
+      setInventory(inv)
+      setAlerts(al)
+      setRiskCounts(riskResp || {})
+      setTrafficPoints(
+        (trafficResp || []).map((t, idx) => ({
+          label: t.path || `slot-${idx}`,
+          requests: t.count || 0,
+          errors: Math.max(0, Math.floor((t.count || 0) * 0.05)),
+        }))
+      )
+    } catch (err: any) {
+      toast({ title: "Failed to load data", description: err.message, variant: "destructive" })
+    } finally {
+      setLoading(false)
     }
-    load()
   }, [toast])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  useEffect(() => {
+    const handler = () => load()
+    window.addEventListener("netraguard-refresh", handler)
+    return () => window.removeEventListener("netraguard-refresh", handler)
+  }, [load])
 
   const stats = useMemo(() => {
     const total = inventory.length
