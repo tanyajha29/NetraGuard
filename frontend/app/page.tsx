@@ -34,22 +34,32 @@ type Asset = {
   path: string
 }
 
+type Summary = {
+  total_apis: number
+  active_apis: number
+  zombie_apis: number
+  shadow_apis: number
+  critical_findings: number
+}
+
 export default function DashboardPage() {
   const { toast } = useToast()
   const [alerts, setAlerts] = useState<AlertItem[]>([])
   const [inventory, setInventory] = useState<Asset[]>([])
   const [riskCounts, setRiskCounts] = useState<Record<string, number>>({})
   const [trafficPoints, setTrafficPoints] = useState<{ label: string; requests: number }[]>([])
+  const [summary, setSummary] = useState<Summary | null>(null)
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
     try {
       setLoading(true)
-      const [inv, al, riskResp, trafficResp] = await Promise.all([
+      const [inv, al, riskResp, trafficResp, summaryResp] = await Promise.all([
         apiFetch<Asset[]>("/api/v1/inventory"),
         apiFetch<AlertItem[]>("/api/v1/alerts"),
         apiFetch<Record<string, number>>("/api/v1/dashboard/risk").catch(() => ({})),
         apiFetch<{ path: string; count: number }[]>("/api/v1/dashboard/traffic").catch(() => []),
+        apiFetch<Summary>("/api/v1/dashboard/summary").catch(() => null),
       ])
       setInventory(inv)
       setAlerts(al)
@@ -61,6 +71,7 @@ export default function DashboardPage() {
           errors: Math.max(0, Math.floor((t.count || 0) * 0.05)),
         }))
       )
+      if (summaryResp) setSummary(summaryResp)
     } catch (err: any) {
       toast({ title: "Failed to load data", description: err.message, variant: "destructive" })
     } finally {
@@ -79,6 +90,15 @@ export default function DashboardPage() {
   }, [load])
 
   const stats = useMemo(() => {
+    if (summary) {
+      return {
+        total: summary.total_apis ?? 0,
+        active: summary.active_apis ?? 0,
+        zombie: summary.zombie_apis ?? 0,
+        shadow: summary.shadow_apis ?? 0,
+        highRisk: summary.critical_findings ?? 0,
+      }
+    }
     const total = inventory.length
     const active = inventory.filter((i) => i.current_status === "active").length
     const zombie = inventory.filter((i) => i.current_status === "zombie").length
