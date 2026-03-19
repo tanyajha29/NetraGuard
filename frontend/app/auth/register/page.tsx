@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/components/auth/auth-provider"
 import Link from "next/link"
 
 export default function RegisterPage() {
@@ -19,7 +19,7 @@ export default function RegisterPage() {
     setLoading(true)
     setError(null)
     try {
-      await register(fullName, email, password)
+      await register({ full_name: fullName, email, password })
       router.replace("/")
     } catch (err: any) {
       setError(err?.message || "Registration failed")
