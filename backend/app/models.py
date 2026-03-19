@@ -125,6 +125,10 @@ class APIAsset(Base):
     version = Column(String, nullable=True)
     source_type = Column(String, nullable=True)
     source_reference = Column(String, nullable=True)
+    source_repo = Column(String, nullable=True)
+    source_path = Column(String, nullable=True)
+    source_branch = Column(String, nullable=True)
+    discovered_from = Column(String, nullable=True)
     service_name = Column(String, nullable=True)
     source = Column(String, nullable=True)
     owner = Column(String, nullable=True)
@@ -208,6 +212,7 @@ class Alert(Base):
     severity = Column(String)
     message = Column(Text)
     status = Column(Enum(AlertStatus), default=AlertStatus.open)
+    slack_notified = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     api_asset = relationship("APIAsset", back_populates="alerts")
@@ -259,6 +264,9 @@ class RemediationTask(Base):
     notes = Column(Text, nullable=True)
     reason = Column(Text, nullable=True)
     source_finding_id = Column(Integer, ForeignKey("api_findings.id"), nullable=True)
+    external_ticket_id = Column(String, nullable=True)
+    external_ticket_url = Column(String, nullable=True)
+    ticket_provider = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

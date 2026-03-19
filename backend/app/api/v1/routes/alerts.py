@@ -21,7 +21,21 @@ def list_alerts(
             query = query.filter(models.Alert.status == models.AlertStatus(status))
         except ValueError:
             return []
-    return query.order_by(models.Alert.created_at.desc()).all()
+    alerts = query.order_by(models.Alert.created_at.desc()).all()
+    return [
+        {
+            "id": a.id,
+            "scan_run_id": a.scan_run_id,
+            "api_asset_id": a.api_asset_id,
+            "alert_type": a.alert_type,
+            "severity": a.severity,
+            "message": a.message,
+            "status": a.status,
+            "slack_notified": getattr(a, "slack_notified", False),
+            "created_at": a.created_at,
+        }
+        for a in alerts
+    ]
 
 
 @router.patch("/{alert_id}")

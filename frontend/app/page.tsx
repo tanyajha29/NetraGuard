@@ -39,7 +39,8 @@ type Summary = {
   active_apis: number
   zombie_apis: number
   shadow_apis: number
-  critical_findings: number
+  critical_findings?: number
+  high_risk_apis?: number
 }
 
 export default function DashboardPage() {
@@ -123,7 +124,7 @@ export default function DashboardPage() {
         active: summary.active_apis ?? 0,
         zombie: summary.zombie_apis ?? 0,
         shadow: summary.shadow_apis ?? 0,
-        highRisk: summary.critical_findings ?? 0,
+        highRisk: summary.high_risk_apis ?? summary.critical_findings ?? 0,
       }
     }
     const total = inventory.length

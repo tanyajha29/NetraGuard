@@ -12,6 +12,7 @@ from app.services.security_service import analyze_endpoint
 from app.services.report_service import render_report
 from app.services.dependency_mapper import upsert_edges
 from app.services.traffic_analyzer import record_samples
+from app.integrations import slack_service, jira_service
 
 settings = get_settings()
 
@@ -111,6 +112,7 @@ def run_scan(
     findings_created: List[models.APIFinding] = []
     alerts_created: List[models.Alert] = []
     remediation_created: List[models.RemediationTask] = []
+    jira_links: List[Dict] = []
     assets_for_report: List[models.APIAsset] = []
     new_assets: List[int] = []
 
@@ -231,6 +233,7 @@ def run_scan(
                     alert_type=finding_type,
                     severity=severity,
                     message=f"{asset.path} is {classification['status']}",
+                    slack_notified=False,
                 )
             )
 
@@ -254,6 +257,7 @@ def run_scan(
                     alert_type=f_type,
                     severity=sev,
                     message=title,
+                    slack_notified=False,
                 )
             )
 
@@ -316,6 +320,7 @@ def run_scan(
                     assigned_to=None,
                     notes="Auto-created from scan",
                     reason=classification["recommendation"],
+                    ticket_provider=None,
                 )
             )
 
@@ -330,6 +335,35 @@ def run_scan(
     db.add_all(findings_created)
     db.add_all(alerts_created)
     db.add_all(remediation_created)
+
+    # Attempt Slack notifications for notable alerts
+    for alert in alerts_created:
+        if alert.severity in {"high", "critical"} or alert.alert_type in {"zombie_api_detected", "shadow_api_detected"}:
+            related_asset = next((a for a in assets_for_report if a.id == alert.api_asset_id), None)
+            blocks = slack_service.alert_block(
+                title=f"{alert.alert_type.replace('_',' ').title()}",
+                lines={
+                    "Endpoint": related_asset.path if related_asset else "",
+                    "Severity": alert.severity,
+                    "Scan": scan.id,
+                    "Message": alert.message,
+                },
+            )
+            sent = slack_service.send_message(blocks, text=f"NetraGuard alert: {alert.alert_type}")
+            alert.slack_notified = sent
+
+    # Create Jira tickets for remediation tasks (zombie/high risk only)
+    for task in remediation_created:
+        related_asset = next((a for a in assets_for_report if a.id == task.api_asset_id), None)
+        if related_asset and related_asset.risk_level.lower() in {"high", "critical"}:
+            summary = f"[NetraGuard] Review {related_asset.path} ({related_asset.current_status})"
+            desc = f"Endpoint {related_asset.method} {related_asset.path}\nRisk: {related_asset.risk_level}\nReason: {task.reason or related_asset.recommendation}\nScan #{scan.id}"
+            issue = jira_service.create_issue(summary, desc)
+            if issue:
+                task.external_ticket_id = issue.get("key")
+                task.external_ticket_url = issue.get("url")
+                task.ticket_provider = "jira"
+                jira_links.append(issue)
 
     scan.total_apis = total
     scan.active_count = active

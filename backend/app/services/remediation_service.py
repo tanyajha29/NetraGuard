@@ -20,6 +20,9 @@ def list_tasks(db: Session):
                 "due_date": t.due_date,
                 "notes": t.notes,
                 "reason": getattr(t, "reason", None),
+                "ticket_provider": getattr(t, "ticket_provider", None),
+                "external_ticket_id": getattr(t, "external_ticket_id", None),
+                "external_ticket_url": getattr(t, "external_ticket_url", None),
                 "created_at": t.created_at,
                 "updated_at": t.updated_at,
             }

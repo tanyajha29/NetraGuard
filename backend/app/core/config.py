@@ -55,6 +55,22 @@ class Settings(BaseSettings):
     logs_dir: str = "data"
     reports_dir: str = "backend/reports"
 
+    # Integrations: GitHub discovery
+    github_token: str | None = None
+    github_owner: str | None = None
+    github_repos: str | None = None  # comma-separated
+    github_branch: str = "main"
+
+    # Integrations: Slack alerts
+    slack_bot_token: str | None = None
+    slack_channel_id: str | None = None
+
+    # Integrations: Jira remediation
+    jira_api_token: str | None = None
+    jira_email: str | None = None
+    jira_base_url: str | None = None
+    jira_project_key: str | None = None
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

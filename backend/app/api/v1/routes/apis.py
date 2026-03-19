@@ -29,6 +29,10 @@ def list_apis(
             "last_seen_at": a.last_seen_at,
             "last_scanned_at": a.last_scanned_at,
             "source": a.source,
+            "source_repo": a.source_repo,
+            "source_path": a.source_path,
+            "source_branch": a.source_branch,
+            "discovered_from": a.discovered_from,
             "owner": a.owner,
         }
         for a in assets
@@ -49,6 +53,10 @@ def get_api(api_id: int, db: Session = Depends(get_db)):
             "service_name": asset.service_name,
             "source": asset.source,
             "source_type": asset.source_type,
+            "source_repo": asset.source_repo,
+            "source_path": asset.source_path,
+            "source_branch": asset.source_branch,
+            "discovered_from": asset.discovered_from,
             "current_status": asset.current_status,
             "risk_level": asset.risk_level,
             "risk_score": asset.risk_score,
@@ -93,6 +101,9 @@ def get_api(api_id: int, db: Session = Depends(get_db)):
                 "due_date": t.due_date,
                 "notes": t.notes,
                 "reason": t.reason,
+                "ticket_provider": t.ticket_provider,
+                "external_ticket_id": t.external_ticket_id,
+                "external_ticket_url": t.external_ticket_url,
                 "created_at": t.created_at,
             }
             for t in detail["remediation_tasks"]
