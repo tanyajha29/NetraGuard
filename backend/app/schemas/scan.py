@@ -14,6 +14,7 @@ class ScanRunOut(Timestamped):
     target_id: int
     initiated_by: int | None
     status: str
+    progress_stage: str | None = None
     trigger_type: str
     started_at: datetime | None
     ended_at: datetime | None
@@ -24,6 +25,8 @@ class ScanRunOut(Timestamped):
     shadow_count: int
     zombie_count: int
     summary_json: dict | None = None
+    vulnerabilities_found: int | None = None
+    duration_seconds: int | None = None
 
     class Config:
         orm_mode = True

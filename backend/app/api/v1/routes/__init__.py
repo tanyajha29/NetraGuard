@@ -16,6 +16,7 @@ from app.api.v1.routes import (
     graph,
     remediation,
     health,
+    ai,
 )
 
 api_router = APIRouter()
@@ -33,4 +34,5 @@ api_router.include_router(zombie.router, prefix="/zombie", tags=["zombie"])
 api_router.include_router(security.router, prefix="/security", tags=["security"])
 api_router.include_router(graph.router, prefix="/graph", tags=["graph"])
 api_router.include_router(remediation.router, prefix="/remediation", tags=["remediation"])
+api_router.include_router(ai.router, prefix="/ai", tags=["ai"])
 api_router.include_router(health.router, tags=["health"])

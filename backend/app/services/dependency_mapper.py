@@ -4,13 +4,22 @@ from app import models
 
 
 def upsert_edges(db: Session, source_assets: List[models.APIAsset], traffic_map: Dict[str, int]):
-    # naive heuristic: create edges between assets sharing prefix segments
-    path_to_asset = {a.path: a for a in source_assets}
-    for path, count in traffic_map.items():
-        for other_path, asset in path_to_asset.items():
-            if path != other_path and path.startswith(other_path.rsplit("/", 1)[0]):
-                edge = models.DependencyEdge(source_api_id=asset.id, target_api_id=asset.id)
-                db.add(edge)
+    """
+    Naive heuristic: connect APIs that share a leading path segment, skipping self-loops
+    and duplicate edges.
+    """
+    existing = {(e.source_api_id, e.target_api_id) for e in db.query(models.DependencyEdge).all()}
+    assets = list(source_assets)
+    for src in assets:
+        src_prefix = src.path.rsplit("/", 1)[0]
+        for tgt in assets:
+            if src.id == tgt.id:
+                continue
+            tgt_prefix = tgt.path.rsplit("/", 1)[0]
+            related = tgt.path.startswith(src_prefix) or src.path.startswith(tgt_prefix)
+            if related and (src.id, tgt.id) not in existing:
+                db.add(models.DependencyEdge(source_api_id=src.id, target_api_id=tgt.id))
+                existing.add((src.id, tgt.id))
 
 
 def graph_payload(db: Session):
@@ -18,7 +27,15 @@ def graph_payload(db: Session):
     edges = []
     assets = db.query(models.APIAsset).all()
     for a in assets:
-        nodes.append({"id": a.id, "label": f"{a.method} {a.path}", "risk": a.risk_level})
+        nodes.append(
+            {
+                "id": a.id,
+                "label": f"{a.method} {a.path}",
+                "risk": a.risk_level,
+                "status": a.current_status,
+                "traffic": a.traffic_count,
+            }
+        )
     for e in db.query(models.DependencyEdge).all():
         edges.append({"source": e.source_api_id, "target": e.target_api_id})
     return {"nodes": nodes, "edges": edges}

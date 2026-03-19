@@ -81,23 +81,36 @@ def run_scan(
     initiated_by: Optional[int],
     trigger_type: str,
     log_file: Optional[str] = None,
+    scan: Optional[models.ScanRun] = None,
 ) -> models.ScanRun:
-    scan = models.ScanRun(
-        target_id=target.id,
-        initiated_by=initiated_by,
-        status=models.ScanStatus.running,
-        trigger_type=trigger_type,
-        started_at=datetime.utcnow(),
-    )
-    db.add(scan)
-    db.commit()
-    db.refresh(scan)
+    now = datetime.utcnow()
+    if scan is None:
+        scan = models.ScanRun(
+            target_id=target.id,
+            initiated_by=initiated_by,
+            status=models.ScanStatus.running,
+            progress_stage="discovering",
+            trigger_type=trigger_type,
+            started_at=now,
+        )
+        db.add(scan)
+        db.commit()
+        db.refresh(scan)
+    else:
+        scan.status = models.ScanStatus.running
+        scan.progress_stage = "discovering"
+        scan.trigger_type = trigger_type
+        scan.started_at = scan.started_at or now
+        db.commit()
 
     endpoints, traffic = _merge_discoveries(target, log_file)
+    scan.progress_stage = "analyzing"
+    db.commit()
 
     total = active = deprecated = shadow = zombie = orphaned = 0
     findings_created: List[models.APIFinding] = []
     alerts_created: List[models.Alert] = []
+    remediation_created: List[models.RemediationTask] = []
     assets_for_report: List[models.APIAsset] = []
     new_assets: List[int] = []
 
@@ -149,6 +162,7 @@ def run_scan(
 
         asset.scan_run_id = scan.id
         asset.last_seen_at = datetime.utcnow()
+        asset.last_scanned_at = datetime.utcnow()
         asset.traffic_count = count
         asset.current_status = classification["status"]
         asset.risk_level = classification["risk_level"]
@@ -294,15 +308,28 @@ def run_scan(
             if settings.demo_mode:
                 _auto_disable_if_demo(target, asset)
 
+        if classification["status"] in {"zombie", "shadow", "deprecated"}:
+            remediation_created.append(
+                models.RemediationTask(
+                    api_asset_id=asset.id,
+                    status="open",
+                    assigned_to=None,
+                    notes="Auto-created from scan",
+                    reason=classification["recommendation"],
+                )
+            )
+
         assets_for_report.append(asset)
         total += 1
 
+    scan.progress_stage = "persisting"
     # Persist traffic samples and basic dependency edges
     record_samples(db, assets_for_report, traffic, models)
     upsert_edges(db, assets_for_report, traffic)
 
     db.add_all(findings_created)
     db.add_all(alerts_created)
+    db.add_all(remediation_created)
 
     scan.total_apis = total
     scan.active_count = active
@@ -310,6 +337,7 @@ def run_scan(
     scan.shadow_count = shadow
     scan.zombie_count = zombie
     scan.orphaned_count = orphaned
+    scan.progress_stage = "completed"
     scan.status = models.ScanStatus.completed
     scan.ended_at = datetime.utcnow()
     scan.summary_json = {
@@ -320,7 +348,12 @@ def run_scan(
         "zombie": zombie,
         "orphaned": orphaned,
         "new_assets": len(new_assets),
+        "findings": len(findings_created),
+        "alerts": len(alerts_created),
     }
+    if scan.started_at and scan.ended_at:
+        scan.duration_seconds = int((scan.ended_at - scan.started_at).total_seconds())
+    scan.vulnerabilities_found = len(findings_created)
 
     db.commit()
     db.refresh(scan)

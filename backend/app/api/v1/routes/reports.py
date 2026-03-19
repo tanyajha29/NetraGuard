@@ -32,6 +32,18 @@ def get_report(
     return report
 
 
+@router.get("/scan/{scan_id}", response_model=report_schema.ReportOut)
+def get_report_by_scan(
+    scan_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    report = db.query(models.Report).filter(models.Report.scan_run_id == scan_id).order_by(models.Report.created_at.desc()).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found for scan")
+    return report
+
+
 @router.get("/{report_id}/download")
 def download_report(
     report_id: int,

@@ -1,42 +1,22 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app import models
+from app.services import dashboard_service
+from app.schemas import dashboard as dashboard_schema
 
 router = APIRouter()
 
 
-@router.get("/summary")
+@router.get("/summary", response_model=dashboard_schema.DashboardSummary)
 def summary(db: Session = Depends(get_db)):
-    total = db.query(models.APIAsset).count()
-    active = db.query(models.APIAsset).filter(models.APIAsset.current_status == "active").count()
-    zombie = db.query(models.APIAsset).filter(models.APIAsset.current_status == "zombie").count()
-    shadow = db.query(models.APIAsset).filter(models.APIAsset.current_status == "shadow").count()
-    critical_findings = db.query(models.APIFinding).filter(models.APIFinding.severity.ilike("high%")).count()
-    return {
-        "total_apis": total,
-        "active_apis": active,
-        "zombie_apis": zombie,
-        "shadow_apis": shadow,
-        "critical_findings": critical_findings,
-    }
+    return dashboard_service.summary(db)
 
 
-@router.get("/traffic")
+@router.get("/traffic", response_model=list[dashboard_schema.TrafficPoint])
 def traffic(db: Session = Depends(get_db)):
-    rows = (
-        db.query(models.APIAsset.path, models.APIAsset.traffic_count)
-        .order_by(models.APIAsset.traffic_count.desc())
-        .limit(20)
-        .all()
-    )
-    return [{"path": r[0], "count": r[1]} for r in rows]
+    return dashboard_service.traffic(db)
 
 
 @router.get("/risk")
 def risk(db: Session = Depends(get_db)):
-    levels = ["Critical", "High", "Medium", "Low", "unknown"]
-    data = {}
-    for lvl in levels:
-        data[lvl] = db.query(models.APIAsset).filter(models.APIAsset.risk_level.ilike(lvl)).count()
-    return data
+    return dashboard_service.risk_breakdown(db)

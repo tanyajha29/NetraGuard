@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -33,15 +34,31 @@ def start_scan(
             trigger_type=body.trigger_type,
             log_file=body.log_file,
         )
-        return {"message": "Scan completed", "scan_id": scan.id, "status": scan.status}
+        status_value = scan.status.value if hasattr(scan.status, "value") else str(scan.status)
+        return {"message": "Scan completed", "scan_id": scan.id, "status": status_value}
+
+    # create a pending scan record so the frontend immediately gets an id
+    scan = models.ScanRun(
+        target_id=target.id,
+        initiated_by=current_user.id if current_user else None,
+        status=models.ScanStatus.pending,
+        progress_stage="queued",
+        trigger_type=body.trigger_type,
+        started_at=datetime.utcnow(),
+    )
+    db.add(scan)
+    db.commit()
+    db.refresh(scan)
 
     task = run_scan_task.delay(
         target_id=target.id,
         initiated_by=current_user.id if current_user else None,
         trigger_type=body.trigger_type,
         log_file=body.log_file,
+        scan_id=scan.id,
     )
-    return {"message": "Scan dispatched", "task_id": task.id}
+    status_value = scan.status.value if hasattr(scan.status, "value") else str(scan.status)
+    return {"message": "Scan dispatched", "task_id": task.id, "scan_id": scan.id, "status": status_value}
 
 
 @router.get("", response_model=list[scan_schema.ScanRunOut])
@@ -73,4 +90,21 @@ def scan_status(
     scan = db.query(models.ScanRun).filter(models.ScanRun.id == scan_id).first()
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
-    return {"status": scan.status, "summary": scan.summary_json}
+    findings_count = db.query(models.APIFinding).filter(models.APIFinding.scan_run_id == scan_id).count()
+    alerts_count = db.query(models.Alert).filter(models.Alert.scan_run_id == scan_id).count()
+    return {
+        "scan_id": scan.id,
+        "status": scan.status.value if hasattr(scan.status, "value") else str(scan.status),
+        "progress_stage": getattr(scan, "progress_stage", None),
+        "started_at": scan.started_at,
+        "completed_at": scan.ended_at,
+        "total_apis": scan.total_apis,
+        "active_count": scan.active_count,
+        "deprecated_count": scan.deprecated_count,
+        "shadow_count": scan.shadow_count,
+        "zombie_count": scan.zombie_count,
+        "orphaned_count": scan.orphaned_count,
+        "findings": findings_count,
+        "alerts": alerts_count,
+        "summary": scan.summary_json,
+    }

@@ -1,19 +1,24 @@
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import sys
+from pathlib import Path
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from backend.models import Base
+# Ensure the FastAPI backend package is importable when running Streamlit/demo scripts
+ROOT_DIR = Path(__file__).resolve().parents[1]
+BACKEND_DIR = ROOT_DIR / "backend"
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "zombie_api.db")
-DATABASE_URL = f"sqlite:///{DB_PATH}"
+from app.db.session import SessionLocal, engine  # type: ignore
+from app.db.base import Base  # type: ignore
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    """
+    Idempotently ensure production tables exist using the canonical SQLAlchemy Base.
+    In production this should be handled by Alembic migrations; this remains
+    as a convenience for demo/Streamlit runs.
+    """
     Base.metadata.create_all(bind=engine)
+
 
 def get_session():
     db = SessionLocal()

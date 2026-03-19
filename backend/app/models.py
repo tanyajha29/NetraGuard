@@ -91,6 +91,7 @@ class ScanRun(Base):
     target_id = Column(Integer, ForeignKey("targets.id"))
     initiated_by = Column(Integer, ForeignKey("users.id"))
     status = Column(Enum(ScanStatus), default=ScanStatus.pending)
+    progress_stage = Column(String, default="pending")
     trigger_type = Column(String, default="manual")
     started_at = Column(DateTime, default=datetime.utcnow)
     ended_at = Column(DateTime, nullable=True)
@@ -256,10 +257,13 @@ class RemediationTask(Base):
     assigned_to = Column(String, nullable=True)
     due_date = Column(DateTime, nullable=True)
     notes = Column(Text, nullable=True)
+    reason = Column(Text, nullable=True)
+    source_finding_id = Column(Integer, ForeignKey("api_findings.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     api_asset = relationship("APIAsset")
+    source_finding = relationship("APIFinding")
 
 
 class DependencyEdge(Base):

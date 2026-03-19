@@ -3,15 +3,62 @@ from app import models
 
 
 def list_tasks(db: Session):
-    return db.query(models.RemediationTask).order_by(models.RemediationTask.created_at.desc()).all()
+    tasks = (
+        db.query(models.RemediationTask)
+        .order_by(models.RemediationTask.created_at.desc())
+        .all()
+    )
+    result = []
+    for t in tasks:
+        result.append(
+            {
+                "id": t.id,
+                "api_asset_id": t.api_asset_id,
+                "api_path": t.api_asset.path if t.api_asset else None,
+                "status": t.status,
+                "assigned_to": t.assigned_to,
+                "due_date": t.due_date,
+                "notes": t.notes,
+                "reason": getattr(t, "reason", None),
+                "created_at": t.created_at,
+                "updated_at": t.updated_at,
+            }
+        )
+    return result
 
 
-def start_task(db: Session, api_asset_id: int, assigned_to: str | None = None, notes: str | None = None):
-    task = models.RemediationTask(api_asset_id=api_asset_id, assigned_to=assigned_to, notes=notes)
+def start_task(
+    db: Session,
+    api_asset_id: int,
+    assigned_to: str | None = None,
+    notes: str | None = None,
+    reason: str | None = None,
+    due_date=None,
+    source_finding_id: int | None = None,
+):
+    task = models.RemediationTask(
+        api_asset_id=api_asset_id,
+        assigned_to=assigned_to,
+        notes=notes,
+        reason=reason,
+        due_date=due_date,
+        source_finding_id=source_finding_id,
+    )
     db.add(task)
     db.commit()
     db.refresh(task)
-    return task
+    return {
+        "id": task.id,
+        "api_asset_id": task.api_asset_id,
+        "api_path": task.api_asset.path if task.api_asset else None,
+        "status": task.status,
+        "assigned_to": task.assigned_to,
+        "due_date": task.due_date,
+        "notes": task.notes,
+        "reason": task.reason,
+        "created_at": task.created_at,
+        "updated_at": task.updated_at,
+    }
 
 
 def update_task(db: Session, task_id: int, status: str | None = None, notes: str | None = None):
@@ -24,4 +71,15 @@ def update_task(db: Session, task_id: int, status: str | None = None, notes: str
         task.notes = notes
     db.commit()
     db.refresh(task)
-    return task
+    return {
+        "id": task.id,
+        "api_asset_id": task.api_asset_id,
+        "api_path": task.api_asset.path if task.api_asset else None,
+        "status": task.status,
+        "assigned_to": task.assigned_to,
+        "due_date": task.due_date,
+        "notes": task.notes,
+        "reason": task.reason,
+        "created_at": task.created_at,
+        "updated_at": task.updated_at,
+    }
