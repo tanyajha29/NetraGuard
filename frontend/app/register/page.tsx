@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
-export default function RegisterPage() {
+function RegisterInner() {
   const { register } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -67,5 +67,13 @@ export default function RegisterPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>}>
+      <RegisterInner />
+    </Suspense>
   );
 }
